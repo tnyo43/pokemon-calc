@@ -7,6 +7,7 @@ export type Move = {
   type: Type;
   power: number;
   pp: number;
+  accuracy: number;
   moveType: MoveType;
   contact: boolean;
 };

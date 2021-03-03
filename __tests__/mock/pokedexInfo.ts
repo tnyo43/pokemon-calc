@@ -21,8 +21,8 @@ export const kamex: PokedexInfo = {
   no: 9,
   name: "カメックス",
   types: ["water"],
-  baseStats: statistics(78, 84, 78, 109, 85, 100),
-  abilities: ["もうか"],
+  baseStats: statistics(79, 83, 100, 85, 105, 78),
+  abilities: ["げきりゅう"],
 };
 
 export const pikachu: PokedexInfo = {
