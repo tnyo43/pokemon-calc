@@ -1,4 +1,4 @@
-import { compatibility as comp } from "@/domain/service/type";
+import { compatibility as comp } from "@/domain/controller/type";
 
 describe("タイプ相性", () => {
   test("効果抜群は*2", () => {

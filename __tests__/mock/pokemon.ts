@@ -1,6 +1,6 @@
 import { Pokemon } from "@/domain/model/pokemon";
-import { pokemon } from "@/domain/service/pokemon";
-import { statistics } from "@/domain/service/stats";
+import { pokemon } from "@/domain/controller/pokemon";
+import { statistics } from "@/domain/controller/stats";
 import * as Pokedex from "__tests__/mock/pokedexInfo";
 import * as Moves from "__tests__/mock/moves";
 

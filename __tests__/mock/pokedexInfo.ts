@@ -1,5 +1,5 @@
 import { PokedexInfo } from "@/domain/model/pokemon";
-import { statistics } from "@/domain/service/stats";
+import { statistics } from "@/domain/controller/stats";
 
 export const fushigibana: PokedexInfo = {
   no: 3,
