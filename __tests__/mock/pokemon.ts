@@ -17,7 +17,7 @@ export const fushigibana: Pokemon = pokemon(
 export const rizadon: Pokemon = pokemon(
   Pokedex.rizadon,
   50,
-  [Moves.flamethrower, Moves.flareBlitz],
+  [Moves.flamethrower, Moves.flareBlitz, Moves.dragonClaw],
   0,
   statistics(0, 0, 0, 0, 0, 0),
   statistics(31, 31, 31, 31, 31, 31),
@@ -27,7 +27,7 @@ export const rizadon: Pokemon = pokemon(
 export const kamex: Pokemon = pokemon(
   Pokedex.kamex,
   50,
-  [Moves.surf],
+  [Moves.surf, Moves.dragonPulse],
   0,
   statistics(0, 0, 0, 0, 0, 0),
   statistics(31, 31, 31, 31, 31, 31),
@@ -38,6 +38,16 @@ export const pikachu: Pokemon = pokemon(
   Pokedex.pikachu,
   50,
   [Moves.Thunderbolt, Moves.voltTackle, Moves.quickAttack],
+  0,
+  statistics(4, 252, 0, 0, 0, 252),
+  statistics(31, 31, 31, 31, 31, 31),
+  { up: "speed", down: "specialAttack" }
+);
+
+export const solrock: Pokemon = pokemon(
+  Pokedex.solrock,
+  50,
+  [Moves.ancientPower, Moves.confusion],
   0,
   statistics(4, 252, 0, 0, 0, 252),
   statistics(31, 31, 31, 31, 31, 31),

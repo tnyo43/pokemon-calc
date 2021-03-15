@@ -69,3 +69,43 @@ export const quickAttack: Move = {
   moveType: "physical",
   contact: true,
 };
+
+export const ancientPower: Move = {
+  name: "げんしのちから",
+  type: "rock",
+  power: 60,
+  pp: 5,
+  accuracy: 100,
+  moveType: "special",
+  contact: false,
+};
+
+export const confusion: Move = {
+  name: "ねんりき",
+  type: "psychic",
+  power: 50,
+  pp: 25,
+  accuracy: 100,
+  moveType: "special",
+  contact: false,
+};
+
+export const dragonClaw: Move = {
+  name: "ドラゴンクロー",
+  type: "dragon",
+  power: 80,
+  pp: 15,
+  accuracy: 100,
+  moveType: "physical",
+  contact: true,
+};
+
+export const dragonPulse: Move = {
+  name: "りゅうのはどう",
+  type: "dragon",
+  power: 85,
+  pp: 10,
+  accuracy: 100,
+  moveType: "special",
+  contact: false,
+};

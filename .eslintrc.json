@@ -13,6 +13,7 @@
   "rules": {
     "import/no-unresolved": "off",
     "no-restricted-imports": ["error", { "patterns": ["./", "../"] }],
-    "@typescript-eslint/explicit-module-boundary-types": 0
+    "@typescript-eslint/explicit-module-boundary-types": 0,
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }]
   }
 }

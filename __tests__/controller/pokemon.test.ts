@@ -6,7 +6,6 @@ import {
   updateStatus,
 } from "@/domain/controller/pokemon";
 import { fushigibana, kamex, pikachu, rizadon } from "__tests__/mock/pokemon";
-import * as Moves from "__tests__/mock/moves";
 import { Pokemon } from "@/domain/model/pokemon";
 
 describe("pokemon", () => {
@@ -32,19 +31,19 @@ describe("pokemon", () => {
 
   describe("ダメージの計算", () => {
     test("でんき->みず 効果はばつぐん", () => {
-      expect(damage(Moves.Thunderbolt, pikachu, kamex)).toBe(62);
-      expect(damage(Moves.voltTackle, pikachu, kamex)).toBe(146);
+      expect(damage(0, pikachu, kamex)).toBe(62);
+      expect(damage(1, pikachu, kamex)).toBe(146);
     });
     test("でんき->くさ 効果はいまひとつ", () => {
-      expect(damage(Moves.Thunderbolt, pikachu, fushigibana)).toBe(16);
-      expect(damage(Moves.voltTackle, pikachu, fushigibana)).toBe(42);
+      expect(damage(0, pikachu, fushigibana)).toBe(16);
+      expect(damage(1, pikachu, fushigibana)).toBe(42);
     });
     test("ほのお->でんき 効果はふつう", () => {
-      expect(damage(Moves.flareBlitz, rizadon, pikachu)).toBe(139);
-      expect(damage(Moves.flamethrower, rizadon, pikachu)).toBe(111);
+      expect(damage(0, rizadon, pikachu)).toBe(111);
+      expect(damage(1, rizadon, pikachu)).toBe(139);
     });
     test("タイプ不一致", () => {
-      expect(damage(Moves.quickAttack, pikachu, rizadon)).toBe(21);
+      expect(damage(2, pikachu, rizadon)).toBe(21);
     });
   });
 

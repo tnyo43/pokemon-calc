@@ -32,3 +32,11 @@ export const pikachu: PokedexInfo = {
   baseStats: statistics(35, 55, 40, 50, 50, 90),
   abilities: ["せいでんき"],
 };
+
+export const solrock: PokedexInfo = {
+  no: 338,
+  name: "ソルロック",
+  types: ["rock", "psychic"],
+  baseStats: statistics(90, 95, 85, 55, 65, 70),
+  abilities: ["ふゆう"],
+};

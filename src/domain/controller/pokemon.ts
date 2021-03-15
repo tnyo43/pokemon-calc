@@ -1,9 +1,14 @@
 import { Characteristic } from "@/domain/model/characteristic";
-import { Move } from "@/domain/model/move";
+import { Move, MoveIndex } from "@/domain/model/move";
 import { PokedexInfo, Pokemon } from "@/domain/model/pokemon";
 import { Statistics, StatisticsType, Status } from "@/domain/model/stats";
 import { Type } from "@/domain/model/type";
 import { compatibility } from "@/domain/controller/type";
+import { Environment } from "@/domain/model/environment";
+import {
+  isTerrainActive,
+  isWeatherActive,
+} from "@/domain/controller/environment";
 
 type CalcParams = {
   baseStats: Statistics;
@@ -90,24 +95,75 @@ export const specialDefence = (pokemon: CalcParams) =>
   calcStatus(pokemon, "specialDefence");
 export const speed = (pokemon: CalcParams) => calcStatus(pokemon, "speed");
 
-export const damage = (move: Move, attacker: Pokemon, defencer: Pokemon) => {
+const defenceWithEnv = (pokemon: Pokemon, _: Environment | undefined) =>
+  defence(pokemon);
+const specialDefenceWithEnv = (
+  pokemon: Pokemon,
+  environment: Environment | undefined
+) => {
+  const coeff =
+    environment &&
+    isWeatherActive(environment, "sandstorm") &&
+    hasType(pokemon, "rock")
+      ? 1.5
+      : 1;
+  return Math.floor(coeff * specialDefence(pokemon));
+};
+
+const power = (move: Move, environment?: Environment) => {
+  const powerCoeficient = !environment
+    ? 1
+    : (move.type === "electric" && isTerrainActive(environment, "electric")) ||
+      (move.type === "grass" && isTerrainActive(environment, "grassy")) ||
+      (move.type === "psychic" && isTerrainActive(environment, "psychic"))
+    ? 1.3
+    : move.type === "dragon" && isTerrainActive(environment, "misty")
+    ? 0.5
+    : 1;
+  return Math.floor(move.power * powerCoeficient);
+};
+
+const weatherCoefficient = (move: Move, environment?: Environment) =>
+  !environment
+    ? 1
+    : isWeatherActive(environment, "rain") && move.type === "water"
+    ? 1.5
+    : isWeatherActive(environment, "rain") && move.type === "fire"
+    ? 0.5
+    : isWeatherActive(environment, "sunlight") && move.type === "water"
+    ? 0.5
+    : isWeatherActive(environment, "sunlight") && move.type === "fire"
+    ? 1.5
+    : 1;
+
+const typeCoefficient = (pokemon: Pokemon, move: Move) =>
+  hasType(pokemon, move.type) ? 1.5 : 1;
+
+export const damage = (
+  index: MoveIndex,
+  attacker: Pokemon,
+  defencer: Pokemon,
+  environment?: Environment
+) => {
+  const move = attacker.moves[index];
   if (move.moveType === "helping") return 0;
   const [attackFuncion, defenceFunction] =
     move.moveType === "physical"
-      ? [attack, defence]
-      : [specialAttack, specialDefence];
+      ? [attack, defenceWithEnv]
+      : [specialAttack, specialDefenceWithEnv];
+  const baseDamage =
+    Math.floor(
+      Math.floor(
+        (Math.floor((attacker.level * 2) / 5 + 2) *
+          power(move, environment) *
+          attackFuncion(attacker)) /
+          defenceFunction(defencer, environment)
+      ) / 50
+    ) + 2;
   return Math.floor(
     Math.floor(
-      (Math.floor(
-        Math.floor(
-          (Math.floor((attacker.level * 2) / 5 + 2) *
-            move.power *
-            attackFuncion(attacker)) /
-            defenceFunction(defencer)
-        ) / 50
-      ) +
-        2) *
-        (hasType(attacker, move.type) ? 1.5 : 1)
+      Math.floor(baseDamage * weatherCoefficient(move, environment)) *
+        typeCoefficient(attacker, move)
     ) * compatibility(move.type, defencer.types)
   );
 };

@@ -24,3 +24,8 @@ export const sandstormMisty: Environment = {
   weather: { value: "sandstorm", count: 5 },
   terrain: { value: "misty", count: 5 },
 };
+
+export const psychic: Environment = {
+  weather: "none",
+  terrain: { value: "psychic", count: 5 },
+};

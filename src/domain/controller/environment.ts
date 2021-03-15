@@ -36,3 +36,9 @@ export const nextEnv = (env: Environment): Environment => {
           },
   };
 };
+
+export const isTerrainActive = (env: Environment, terrain: Terrain) =>
+  env.terrain !== "none" && env.terrain.value === terrain;
+
+export const isWeatherActive = (env: Environment, weather: Weather) =>
+  env.weather !== "none" && env.weather.value === weather;
