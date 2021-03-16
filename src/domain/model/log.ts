@@ -6,7 +6,8 @@ export type Log =
   | { label: "attack"; name: string; move: string }
   | { label: "damage"; name: string; damage: number }
   | { label: "weather"; weather: Weather; isEnd: boolean }
-  | { label: "weather damage"; weather: Weather; name: string };
+  | { label: "weather damage"; weather: Weather; name: string }
+  | { label: "ko"; name: string };
 
 export const attackLog = (pokemon: Pokemon, moveIndex: MoveIndex): Log => ({
   label: "attack",
@@ -32,10 +33,15 @@ export const weatherDamageLog = (weather: Weather, pokemon: Pokemon): Log => ({
   name: pokemon.name,
 });
 
+export const koLog = (pokemon: Pokemon): Log => ({
+  label: "ko",
+  name: pokemon.name,
+});
+
 export const toString = (log: Log): string => {
-  if (log.label === "attack") return `${log.name} の ${log.move}！`;
+  if (log.label === "attack") return `${log.name}の ${log.move}！`;
   else if (log.label == "damage")
-    return `${log.name} は ${log.damage} ダメージ受けた！`;
+    return `${log.name}は ${log.damage} ダメージ受けた！`;
   else if (log.label === "weather") {
     const { weather, isEnd } = log;
     if (weather === "sunlight") {
@@ -56,6 +62,6 @@ export const toString = (log: Log): string => {
     if (weather === "sandstorm") return `砂あらしが ${name}を おそう！`;
     else if (weather === "hail") return `あられが ${name}を おそう！`;
     return "";
-  }
+  } else if (log.label === "ko") return `${log.name}は たおれた！`;
   return "";
 };

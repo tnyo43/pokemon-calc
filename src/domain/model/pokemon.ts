@@ -20,4 +20,5 @@ export type Pokemon = Omit<PokedexInfo, "abilities"> & {
   characteristic: Characteristic;
   status: Status;
   basicValue: Statistics;
+  dying: boolean;
 };

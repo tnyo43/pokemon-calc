@@ -7,6 +7,7 @@ import { Pokemon } from "@/domain/model/pokemon";
 import {
   attackLog,
   damageLog,
+  koLog,
   Log,
   weatherDamageLog,
   weatherLog,
@@ -54,7 +55,7 @@ const updateEnvironment = (progress: Progress, isFirstA: boolean): Progress => {
   const beHurtByWeather = (pokemon: Pokemon, log: Log[]): [Pokemon, Log[]] => {
     let result = pokemon;
     const damage = weatherDamage(nextEnvironment, pokemon);
-    if (damage && weather) {
+    if (!pokemon.dying && damage && weather) {
       result = beHurt(pokemon, damage);
       log = log.concat(weatherDamageLog(weather, pokemon));
     }
@@ -93,15 +94,38 @@ export const run = (progress: Progress, command: Command): Progress => {
     priorityDiff > 0 ||
     (priorityDiff === 0 &&
       (speedDiff > 0 || (speedDiff === 0 && probability(0.5))));
+  const [first, second]: ("playerA" | "playerB")[] = isFirstA
+    ? ["playerA", "playerB"]
+    : ["playerB", "playerA"];
+
+  const judge = (progress: Progress, isA: boolean): Progress => {
+    const poke = progress[isA ? "pokemonA" : "pokemonB"];
+    if (poke.dying || poke.status.hp) return progress;
+    return {
+      ...progress,
+      [isA ? "pokemonA" : "pokemonB"]: { ...poke, dying: true },
+      log: progress.log.concat(koLog(poke)),
+    };
+  };
 
   let progResult = attack(progress, {
     isAttackerA: isFirstA,
-    moveIndex: command[isFirstA ? "playerA" : "playerB"],
+    moveIndex: command[first],
   });
-  progResult = attack(progResult, {
-    isAttackerA: !isFirstA,
-    moveIndex: command[isFirstA ? "playerB" : "playerA"],
-  });
+  progResult = judge(progResult, !isFirstA);
+  progResult = judge(progResult, isFirstA);
+
+  if (!progResult[isFirstA ? "pokemonB" : "pokemonA"].dying) {
+    progResult = attack(progResult, {
+      isAttackerA: !isFirstA,
+      moveIndex: command[second],
+    });
+    progResult = judge(progResult, isFirstA);
+    progResult = judge(progResult, !isFirstA);
+  }
+
   progResult = updateEnvironment(progResult, isFirstA);
+  progResult = judge(progResult, isFirstA);
+  progResult = judge(progResult, !isFirstA);
   return progResult;
 };

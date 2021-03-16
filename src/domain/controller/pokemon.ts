@@ -242,5 +242,6 @@ export const pokemon = (
       specialDefence: specialDefence(params),
       speed: speed(params),
     },
+    dying: false,
   };
 };
