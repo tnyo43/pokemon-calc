@@ -11,6 +11,7 @@ import {
   weatherDamageLog,
   weatherLog,
 } from "@/domain/model/log";
+import { priority } from "@/domain/controller/move";
 
 type Action = { isAttackerA: boolean; moveIndex: MoveIndex };
 
@@ -82,16 +83,25 @@ const updateEnvironment = (progress: Progress, isFirstA: boolean): Progress => {
 
 export const run = (progress: Progress, command: Command): Progress => {
   const { pokemonA, pokemonB } = progress;
+  const [moveA, moveB] = [
+    pokemonA.moves[command.playerA],
+    pokemonB.moves[command.playerB],
+  ];
+  const priorityDiff = priority(moveA) - priority(moveB);
   const speedDiff = speed(pokemonA) - speed(pokemonB);
-  const isFirstA = speedDiff > 0 || (speedDiff === 0 && probability(0.5));
-  const progFirst = attack(progress, {
+  const isFirstA =
+    priorityDiff > 0 ||
+    (priorityDiff === 0 &&
+      (speedDiff > 0 || (speedDiff === 0 && probability(0.5))));
+
+  let progResult = attack(progress, {
     isAttackerA: isFirstA,
     moveIndex: command[isFirstA ? "playerA" : "playerB"],
   });
-  const progSecond = attack(progFirst, {
+  progResult = attack(progResult, {
     isAttackerA: !isFirstA,
     moveIndex: command[isFirstA ? "playerB" : "playerA"],
   });
-  const progWeather = updateEnvironment(progSecond, isFirstA);
-  return progWeather;
+  progResult = updateEnvironment(progResult, isFirstA);
+  return progResult;
 };

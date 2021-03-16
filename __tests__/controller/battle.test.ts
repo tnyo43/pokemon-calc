@@ -6,7 +6,7 @@ import {
   sandstormMisty,
   sunlight,
 } from "__tests__/mock/environment";
-import { kamex, rizadon } from "__tests__/mock/pokemon";
+import { kamex, pikachu, rizadon, weavile } from "__tests__/mock/pokemon";
 
 describe("battle", () => {
   test("天候なし、通常の攻撃のやりとり", () => {
@@ -86,6 +86,33 @@ describe("battle", () => {
       "砂あらしが ふきあれる",
       "砂あらしが リザードンを おそう！",
       "砂あらしが カメックスを おそう！",
+    ]);
+  });
+
+  test("優先度+1のわざが先に出る", () => {
+    let progress: Progress = {
+      pokemonA: pikachu,
+      pokemonB: weavile,
+      environment: normalEnv,
+      log: [],
+    };
+    progress = run(progress, {
+      playerA: 2,
+      playerB: 0,
+    });
+    progress = run(progress, {
+      playerA: 2,
+      playerB: 1,
+    });
+    expect(progress.log.map(toString)).toStrictEqual([
+      "ピカチュウ の でんこうせっか！",
+      "マニューラ は 24 ダメージ受けた！",
+      "マニューラ の あくのはどう！",
+      "ピカチュウ は 46 ダメージ受けた！",
+      "マニューラ の こおりのつぶて！",
+      "ピカチュウ は 78 ダメージ受けた！",
+      "ピカチュウ の でんこうせっか！",
+      "マニューラ は 24 ダメージ受けた！",
     ]);
   });
 });

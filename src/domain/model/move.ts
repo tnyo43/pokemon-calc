@@ -10,6 +10,7 @@ export type Move = {
   accuracy: number;
   moveType: MoveType;
   contact: boolean;
+  proprity?: number;
 };
 
 export type MoveIndex = 0 | 1 | 2 | 3;
