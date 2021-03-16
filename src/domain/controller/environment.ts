@@ -18,10 +18,9 @@ export const overrideTerrain = (
   terrain: { value: terrain, count: 5 },
 });
 
-export const nextEnv = (env: Environment): Environment => {
+export const next = (env: Environment): Environment => {
   const { weather, terrain } = env;
   return {
-    ...env,
     weather:
       weather === "none" || weather.count === 1
         ? "none"
