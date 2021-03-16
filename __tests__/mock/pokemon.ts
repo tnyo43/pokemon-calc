@@ -49,6 +49,16 @@ export const solrock: Pokemon = pokemon(
   50,
   [Moves.ancientPower, Moves.confusion],
   0,
+  statistics(12, 252, 28, 0, 4, 212),
+  statistics(31, 31, 31, 31, 31, 31),
+  { up: "speed", down: "specialAttack" }
+);
+
+export const weavile: Pokemon = pokemon(
+  Pokedex.weavile,
+  50,
+  [Moves.darkPulse, Moves.iceShard],
+  0,
   statistics(4, 252, 0, 0, 0, 252),
   statistics(31, 31, 31, 31, 31, 31),
   { up: "speed", down: "specialAttack" }

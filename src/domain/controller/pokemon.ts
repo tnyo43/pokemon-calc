@@ -19,7 +19,7 @@ type CalcParams = {
   status: Status;
 };
 
-const hasType = (pokemon: Pokemon, type: Type) =>
+export const hasType = (pokemon: Pokemon, type: Type) =>
   pokemon.types.some((t) => t === type);
 
 const characteristicCorrection = (

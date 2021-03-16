@@ -40,3 +40,11 @@ export const solrock: PokedexInfo = {
   baseStats: statistics(90, 95, 85, 55, 65, 70),
   abilities: ["ふゆう"],
 };
+
+export const weavile: PokedexInfo = {
+  no: 461,
+  name: "マニューラ",
+  types: ["dark", "ice"],
+  baseStats: statistics(70, 120, 65, 45, 85, 125),
+  abilities: ["プレッシャー", "わるいてぐせ"],
+};

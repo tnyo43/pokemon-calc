@@ -2,10 +2,12 @@ import {
   overrideWeather,
   overrideTerrain,
   nextEnv,
+  damage as weatherDamage,
 } from "@/domain/controller/environment";
 import { damage } from "@/domain/controller/pokemon";
 import {
   grassy,
+  hail,
   normalEnv,
   psychic,
   rainElectric,
@@ -18,6 +20,7 @@ import {
   fushigibana,
   rizadon,
   solrock,
+  weavile,
 } from "__tests__/mock/pokemon";
 
 describe("environment", () => {
@@ -124,8 +127,28 @@ describe("environment", () => {
       const attacker = rizadon;
       const defencer = solrock;
 
-      expect(damage(0, attacker, defencer, normalEnv)).toBe(46);
-      expect(damage(0, attacker, defencer, sandstormMisty)).toBe(31);
+      expect(damage(0, attacker, defencer, normalEnv)).toBe(45);
+      expect(damage(0, attacker, defencer, sandstormMisty)).toBe(30);
+    });
+  });
+
+  describe("ターンが終了するとスリットダメージが入る", () => {
+    test("天候なし、あめ・はれ下はダメージなし", () => {
+      expect(weatherDamage(normalEnv, pikachu)).toBe(0);
+      expect(weatherDamage(rainElectric, pikachu)).toBe(0);
+      expect(weatherDamage(sunlight, pikachu)).toBe(0);
+    });
+
+    test("すなあらし下はいわ、じめん、はがね以外ダメージ", () => {
+      expect(weatherDamage(sandstormMisty, pikachu)).toBe(6);
+      expect(weatherDamage(sandstormMisty, solrock)).toBe(0);
+      expect(weatherDamage(sandstormMisty, weavile)).toBe(9);
+    });
+
+    test("あられ下はこおり以外ダメージ", () => {
+      expect(weatherDamage(hail, pikachu)).toBe(6);
+      expect(weatherDamage(hail, solrock)).toBe(10);
+      expect(weatherDamage(hail, weavile)).toBe(0);
     });
   });
 });

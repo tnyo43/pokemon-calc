@@ -29,3 +29,8 @@ export const psychic: Environment = {
   weather: "none",
   terrain: { value: "psychic", count: 5 },
 };
+
+export const hail: Environment = {
+  weather: { value: "hail", count: 5 },
+  terrain: "none",
+};

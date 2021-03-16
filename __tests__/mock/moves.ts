@@ -109,3 +109,33 @@ export const dragonPulse: Move = {
   moveType: "special",
   contact: false,
 };
+
+export const iceBeam: Move = {
+  name: "れいとうビーム",
+  type: "ice",
+  power: 90,
+  pp: 10,
+  accuracy: 100,
+  moveType: "special",
+  contact: false,
+};
+
+export const iceShard: Move = {
+  name: "こおりのつぶて",
+  type: "ice",
+  power: 40,
+  pp: 30,
+  accuracy: 100,
+  moveType: "physical",
+  contact: false,
+};
+
+export const darkPulse: Move = {
+  name: "あくのはどう",
+  type: "dark",
+  power: 80,
+  pp: 15,
+  accuracy: 100,
+  moveType: "special",
+  contact: false,
+};
