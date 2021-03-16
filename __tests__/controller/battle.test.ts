@@ -1,5 +1,6 @@
 import { run } from "@/domain/controller/battle";
 import { Command, Progress } from "@/domain/model/battle";
+import { toString } from "@/domain/model/log";
 import {
   normalEnv,
   sandstormMisty,
@@ -13,6 +14,7 @@ describe("battle", () => {
       pokemonA: rizadon,
       pokemonB: kamex,
       environment: normalEnv,
+      log: [],
     };
     const command: Command = {
       playerA: 0,
@@ -23,6 +25,12 @@ describe("battle", () => {
     expect(result.pokemonA.status.hp).toBe(31);
     expect(result.pokemonB.status.hp).toBe(123);
     expect(result.environment).toStrictEqual(normalEnv);
+    expect(result.log.map(toString)).toStrictEqual([
+      "リザードン の かえんしょうしゃ！",
+      "カメックス は 31 ダメージ受けた！",
+      "カメックス の なみのり！",
+      "リザードン は 122 ダメージ受けた！",
+    ]);
   });
 
   test("はれ", () => {
@@ -30,6 +38,7 @@ describe("battle", () => {
       pokemonA: rizadon,
       pokemonB: kamex,
       environment: sunlight,
+      log: [],
     };
     const command: Command = {
       playerA: 0,
@@ -37,12 +46,17 @@ describe("battle", () => {
     };
 
     const result = run(progress, command);
-    expect(result.pokemonA.status.hp).toBe(93);
-    expect(result.pokemonB.status.hp).toBe(107);
     expect(result.environment.weather).toStrictEqual({
       value: "sunlight",
       count: 4,
     });
+    expect(result.log.map(toString)).toStrictEqual([
+      "リザードン の かえんしょうしゃ！",
+      "カメックス は 47 ダメージ受けた！",
+      "カメックス の なみのり！",
+      "リザードン は 60 ダメージ受けた！",
+      "日差しが 強い",
+    ]);
   });
 
   test("すなあらしのダメージとターン経過", () => {
@@ -50,6 +64,7 @@ describe("battle", () => {
       pokemonA: rizadon,
       pokemonB: kamex,
       environment: sandstormMisty,
+      log: [],
     };
     const command: Command = {
       playerA: 0,
@@ -63,5 +78,14 @@ describe("battle", () => {
       weather: { value: "sandstorm", count: 4 },
       terrain: { value: "misty", count: 4 },
     });
+    expect(result.log.map(toString)).toStrictEqual([
+      "リザードン の かえんしょうしゃ！",
+      "カメックス は 31 ダメージ受けた！",
+      "カメックス の なみのり！",
+      "リザードン は 122 ダメージ受けた！",
+      "砂あらしが ふきあれる",
+      "砂あらしが リザードンを おそう！",
+      "砂あらしが カメックスを おそう！",
+    ]);
   });
 });
