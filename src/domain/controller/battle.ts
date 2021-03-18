@@ -5,6 +5,7 @@ import { MoveIndex } from "@/domain/model/move";
 import { next, damage as weatherDamage } from "@/domain/controller/environment";
 import { Pokemon } from "@/domain/model/pokemon";
 import {
+  add,
   attackLog,
   damageLog,
   koLog,
@@ -20,11 +21,12 @@ const beHurt = (pokemon: Pokemon, damage: number) =>
   updateStatus(pokemon, { hp: -damage });
 
 const attack = (progress: Progress, action: Action): Progress => {
-  const { pokemonA, pokemonB, environment, log } = progress;
+  const { pokemonA, pokemonB, environment } = progress;
+  let log = progress.log;
   const [attacker, defencer] = action.isAttackerA
     ? [pokemonA, pokemonB]
     : [pokemonB, pokemonA];
-  const nextLog = log.concat(attackLog(attacker, action.moveIndex));
+  log = add(log, attackLog(attacker, action.moveIndex));
   const damageResult = damage(
     action.moveIndex,
     attacker,
@@ -32,11 +34,11 @@ const attack = (progress: Progress, action: Action): Progress => {
     environment
   );
   const nextDefencer = beHurt(defencer, damageResult);
-  nextLog.push(damageLog(defencer, damageResult));
+  log = add(log, damageLog(defencer, damageResult));
 
   return {
     ...progress,
-    log: nextLog,
+    log,
     [action.isAttackerA ? "pokemonB" : "pokemonA"]: nextDefencer,
   };
 };
@@ -49,7 +51,7 @@ const updateEnvironment = (progress: Progress, isFirstA: boolean): Progress => {
 
   let log = progress.log;
   if (weather) {
-    log = log.concat(weatherLog(weather, nextEnvironment.weather === "none"));
+    log = add(log, weatherLog(weather, nextEnvironment.weather === "none"));
   }
 
   const beHurtByWeather = (pokemon: Pokemon, log: Log[]): [Pokemon, Log[]] => {
@@ -57,7 +59,7 @@ const updateEnvironment = (progress: Progress, isFirstA: boolean): Progress => {
     const damage = weatherDamage(nextEnvironment, pokemon);
     if (!pokemon.dying && damage && weather) {
       result = beHurt(pokemon, damage);
-      log = log.concat(weatherDamageLog(weather, pokemon));
+      log = add(log, weatherDamageLog(weather, pokemon));
     }
     return [result, log];
   };
@@ -104,7 +106,7 @@ export const run = (progress: Progress, command: Command): Progress => {
     return {
       ...progress,
       [isA ? "pokemonA" : "pokemonB"]: { ...poke, dying: true },
-      log: progress.log.concat(koLog(poke)),
+      log: add(progress.log, koLog(poke)),
     };
   };
 
