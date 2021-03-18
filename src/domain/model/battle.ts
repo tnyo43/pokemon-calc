@@ -1,16 +1,15 @@
-import { Pokemon } from "@/domain/model/pokemon";
 import { Environment } from "@/domain/model/environment";
-import { MoveIndex } from "@/domain/model/move";
 import { Log } from "@/domain/model/log";
+import { Player } from "@/domain/model/player";
 
 export type Command = {
-  playerA: MoveIndex;
-  playerB: MoveIndex;
+  playerA: number;
+  playerB: number;
 };
 
 export type Progress = {
-  pokemonA: Pokemon;
-  pokemonB: Pokemon;
+  playerA: Player;
+  playerB: Player;
   environment: Environment;
   log: Log[];
 };

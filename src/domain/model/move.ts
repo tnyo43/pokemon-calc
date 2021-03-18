@@ -12,5 +12,3 @@ export type Move = {
   contact: boolean;
   proprity?: number;
 };
-
-export type MoveIndex = 0 | 1 | 2 | 3;

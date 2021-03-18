@@ -1,7 +1,6 @@
 import { Command, Progress } from "@/domain/model/battle";
 import { damage, speed, updateStatus } from "@/domain/controller/pokemon";
 import { probability } from "@/utils";
-import { MoveIndex } from "@/domain/model/move";
 import { next, damage as weatherDamage } from "@/domain/controller/environment";
 import { Pokemon } from "@/domain/model/pokemon";
 import {
@@ -14,15 +13,21 @@ import {
   weatherLog,
 } from "@/domain/model/log";
 import { priority } from "@/domain/controller/move";
+import { updatePokemon, currentPokemon } from "@/domain/controller/player";
 
-type Action = { isAttackerA: boolean; moveIndex: MoveIndex };
+type Action = { isAttackerA: boolean; moveIndex: number };
 
 const beHurt = (pokemon: Pokemon, damage: number) =>
   updateStatus(pokemon, { hp: -damage });
 
 const attack = (progress: Progress, action: Action): Progress => {
-  const { pokemonA, pokemonB, environment } = progress;
+  const { playerA, playerB, environment } = progress;
+  const [pokemonA, pokemonB] = [
+    currentPokemon(playerA),
+    currentPokemon(playerB),
+  ];
   let log = progress.log;
+
   const [attacker, defencer] = action.isAttackerA
     ? [pokemonA, pokemonB]
     : [pokemonB, pokemonA];
@@ -33,18 +38,23 @@ const attack = (progress: Progress, action: Action): Progress => {
     defencer,
     environment
   );
-  const nextDefencer = beHurt(defencer, damageResult);
+  const defencedPlayer = updatePokemon(
+    action.isAttackerA ? playerB : playerA,
+    beHurt(defencer, damageResult)
+  );
   log = add(log, damageLog(defencer, damageResult));
 
   return {
     ...progress,
     log,
-    [action.isAttackerA ? "pokemonB" : "pokemonA"]: nextDefencer,
+    [action.isAttackerA ? "playerB" : "playerA"]: defencedPlayer,
   };
 };
 
 const updateEnvironment = (progress: Progress, isFirstA: boolean): Progress => {
-  const { pokemonA, pokemonB, environment } = progress;
+  const { playerA, playerB, environment } = progress;
+  let [pokemonA, pokemonB] = [currentPokemon(playerA), currentPokemon(playerB)];
+
   const nextEnvironment = next(environment);
   const weather =
     environment.weather === "none" ? null : environment.weather.value;
@@ -64,28 +74,30 @@ const updateEnvironment = (progress: Progress, isFirstA: boolean): Progress => {
     return [result, log];
   };
 
-  let damagedA: Pokemon = pokemonA;
-  let damagedB: Pokemon = pokemonB;
   if (weather) {
     if (isFirstA) {
-      [damagedA, log] = beHurtByWeather(pokemonA, log);
-      [damagedB, log] = beHurtByWeather(pokemonB, log);
+      [pokemonA, log] = beHurtByWeather(pokemonA, log);
+      [pokemonB, log] = beHurtByWeather(pokemonB, log);
     } else {
-      [damagedB, log] = beHurtByWeather(pokemonB, log);
-      [damagedA, log] = beHurtByWeather(pokemonA, log);
+      [pokemonB, log] = beHurtByWeather(pokemonB, log);
+      [pokemonA, log] = beHurtByWeather(pokemonA, log);
     }
   }
 
   return {
-    pokemonA: damagedA,
-    pokemonB: damagedB,
+    playerA: updatePokemon(playerA, pokemonA),
+    playerB: updatePokemon(playerB, pokemonB),
     environment: nextEnvironment,
     log,
   };
 };
 
 export const run = (progress: Progress, command: Command): Progress => {
-  const { pokemonA, pokemonB } = progress;
+  const { playerA, playerB } = progress;
+  const [pokemonA, pokemonB] = [
+    currentPokemon(playerA),
+    currentPokemon(playerB),
+  ];
   const [moveA, moveB] = [
     pokemonA.moves[command.playerA],
     pokemonB.moves[command.playerB],
@@ -100,12 +112,16 @@ export const run = (progress: Progress, command: Command): Progress => {
     ? ["playerA", "playerB"]
     : ["playerB", "playerA"];
 
-  const judge = (progress: Progress, isA: boolean): Progress => {
-    const poke = progress[isA ? "pokemonA" : "pokemonB"];
+  const judge = (
+    progress: Progress,
+    playerKey: "playerA" | "playerB"
+  ): Progress => {
+    const player = progress[playerKey];
+    const poke = currentPokemon(player);
     if (poke.dying || poke.status.hp) return progress;
     return {
       ...progress,
-      [isA ? "pokemonA" : "pokemonB"]: { ...poke, dying: true },
+      [playerKey]: updatePokemon(player, { ...poke, dying: true }),
       log: add(progress.log, koLog(poke)),
     };
   };
@@ -114,20 +130,20 @@ export const run = (progress: Progress, command: Command): Progress => {
     isAttackerA: isFirstA,
     moveIndex: command[first],
   });
-  progResult = judge(progResult, !isFirstA);
-  progResult = judge(progResult, isFirstA);
+  progResult = judge(progResult, second);
+  progResult = judge(progResult, first);
 
-  if (!progResult[isFirstA ? "pokemonB" : "pokemonA"].dying) {
+  if (!currentPokemon(progResult[second]).dying) {
     progResult = attack(progResult, {
       isAttackerA: !isFirstA,
       moveIndex: command[second],
     });
-    progResult = judge(progResult, isFirstA);
-    progResult = judge(progResult, !isFirstA);
+    progResult = judge(progResult, first);
+    progResult = judge(progResult, second);
   }
 
   progResult = updateEnvironment(progResult, isFirstA);
-  progResult = judge(progResult, isFirstA);
-  progResult = judge(progResult, !isFirstA);
+  progResult = judge(progResult, first);
+  progResult = judge(progResult, second);
   return progResult;
 };

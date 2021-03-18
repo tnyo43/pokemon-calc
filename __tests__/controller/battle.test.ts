@@ -1,4 +1,5 @@
 import { run } from "@/domain/controller/battle";
+import { currentPokemon } from "@/domain/controller/player";
 import { Command, Progress } from "@/domain/model/battle";
 import { toString } from "@/domain/model/log";
 import {
@@ -7,13 +8,20 @@ import {
   sandstormMisty,
   sunlight,
 } from "__tests__/mock/environment";
+import { playerA, playerB } from "__tests__/mock/player";
 import { kamex, pikachu, rizadon, weavile } from "__tests__/mock/pokemon";
 
 describe("battle", () => {
   test("天候なし、通常の攻撃のやりとり", () => {
     const progress: Progress = {
-      pokemonA: rizadon,
-      pokemonB: kamex,
+      playerA: {
+        ...playerA,
+        pokemons: [rizadon],
+      },
+      playerB: {
+        ...playerB,
+        pokemons: [kamex],
+      },
       environment: normalEnv,
       log: [],
     };
@@ -23,8 +31,8 @@ describe("battle", () => {
     };
 
     const result = run(progress, command);
-    expect(result.pokemonA.status.hp).toBe(31);
-    expect(result.pokemonB.status.hp).toBe(123);
+    expect(currentPokemon(result.playerA).status.hp).toBe(31);
+    expect(currentPokemon(result.playerB).status.hp).toBe(123);
     expect(result.environment).toStrictEqual(normalEnv);
     expect(result.log.map(toString)).toStrictEqual([
       "リザードンの かえんしょうしゃ！",
@@ -36,8 +44,14 @@ describe("battle", () => {
 
   test("はれ", () => {
     const progress: Progress = {
-      pokemonA: rizadon,
-      pokemonB: kamex,
+      playerA: {
+        ...playerA,
+        pokemons: [rizadon],
+      },
+      playerB: {
+        ...playerB,
+        pokemons: [kamex],
+      },
       environment: sunlight,
       log: [],
     };
@@ -62,8 +76,14 @@ describe("battle", () => {
 
   test("すなあらしのダメージとターン経過", () => {
     const progress: Progress = {
-      pokemonA: rizadon,
-      pokemonB: kamex,
+      playerA: {
+        ...playerA,
+        pokemons: [rizadon],
+      },
+      playerB: {
+        ...playerB,
+        pokemons: [kamex],
+      },
       environment: sandstormMisty,
       log: [],
     };
@@ -73,8 +93,8 @@ describe("battle", () => {
     };
 
     const result = run(progress, command);
-    expect(result.pokemonA.status.hp).toBe(22);
-    expect(result.pokemonB.status.hp).toBe(114);
+    expect(currentPokemon(result.playerA).status.hp).toBe(22);
+    expect(currentPokemon(result.playerB).status.hp).toBe(114);
     expect(result.environment).toStrictEqual({
       weather: { value: "sandstorm", count: 4 },
       terrain: { value: "misty", count: 4 },
@@ -92,8 +112,14 @@ describe("battle", () => {
 
   test("優先度+1のわざが先に出る", () => {
     let progress: Progress = {
-      pokemonA: pikachu,
-      pokemonB: weavile,
+      playerA: {
+        ...playerA,
+        pokemons: [pikachu],
+      },
+      playerB: {
+        ...playerB,
+        pokemons: [weavile],
+      },
       environment: normalEnv,
       log: [],
     };
@@ -118,8 +144,14 @@ describe("battle", () => {
 
   test("残りHPが0になると戦闘不能になる", () => {
     let progress: Progress = {
-      pokemonA: kamex,
-      pokemonB: rizadon,
+      playerA: {
+        ...playerA,
+        pokemons: [kamex],
+      },
+      playerB: {
+        ...playerB,
+        pokemons: [rizadon],
+      },
       environment: normalEnv,
       log: [],
     };
@@ -131,8 +163,8 @@ describe("battle", () => {
       playerA: 0,
       playerB: 0,
     });
-    expect(progress.pokemonB.status.hp).toBe(0);
-    expect(progress.pokemonA.status.hp).not.toBe(0);
+    expect(currentPokemon(progress.playerB).status.hp).toBe(0);
+    expect(currentPokemon(progress.playerA).status.hp).not.toBe(0);
     expect(progress.log.map(toString)).toStrictEqual([
       "リザードンの かえんしょうしゃ！",
       "カメックスは 31 ダメージ受けた！",
@@ -148,19 +180,29 @@ describe("battle", () => {
 
   test("天候ログでも瀕死になることがある", () => {
     let progress: Progress = {
-      pokemonA: {
-        ...kamex,
-        status: {
-          ...kamex.status,
-          hp: 32,
-        },
+      playerA: {
+        ...playerA,
+        pokemons: [
+          {
+            ...kamex,
+            status: {
+              ...kamex.status,
+              hp: 32,
+            },
+          },
+        ],
       },
-      pokemonB: {
-        ...rizadon,
-        status: {
-          ...rizadon.status,
-          hp: 100,
-        },
+      playerB: {
+        ...playerB,
+        pokemons: [
+          {
+            ...rizadon,
+            status: {
+              ...rizadon.status,
+              hp: 100,
+            },
+          },
+        ],
       },
       environment: hail,
       log: [],

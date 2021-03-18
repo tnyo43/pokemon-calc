@@ -1,4 +1,3 @@
-import { MoveIndex } from "@/domain/model/move";
 import { Pokemon } from "@/domain/model/pokemon";
 import { Weather } from "@/domain/model/environment";
 
@@ -9,7 +8,7 @@ export type Log =
   | { label: "weather damage"; weather: Weather; name: string }
   | { label: "ko"; name: string };
 
-export const attackLog = (pokemon: Pokemon, moveIndex: MoveIndex): Log => ({
+export const attackLog = (pokemon: Pokemon, moveIndex: number): Log => ({
   label: "attack",
   name: pokemon.name,
   move: pokemon.moves[moveIndex].name,
