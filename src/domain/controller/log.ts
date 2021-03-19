@@ -10,7 +10,7 @@ export const apply = ({ log }: { log: Config }) => {
   config = log;
 };
 
-export const getConfig = () => config;
+const getConfig = () => config;
 
 export const attackLog = (pokemon: Pokemon, moveIndex: number): Log => ({
   label: "attack",

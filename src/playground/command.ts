@@ -12,7 +12,7 @@ const validIndex = (candidate: number[], answer: string): number | null => {
 
 const askType = async (): Promise<Command | null> =>
   await read<Command | null>(
-    "たたかう(fight) or 交換する(change)？ [f/c] ",
+    "たたかう(fight) or 交換する(change)？ [f/c] >> ",
     (answer) => {
       switch (answer.toLowerCase()) {
         case "f":
@@ -32,7 +32,7 @@ const askMove = async (player: Player): Promise<Command | null> => {
   const moves = currentPokemon(player).moves;
   const question = `どの技にする？ ${moves
     .map((move, i) => `[${i + 1}] ${move.name}`)
-    .join(", ")}, [-1] 戻る`;
+    .join(", ")}, [-1] 戻る >> `;
 
   return await read<Command | null>(question, (answer) => {
     if (answer === "-1") {
@@ -57,8 +57,8 @@ const askChange = async (player: Player): Promise<Command | null> => {
     .map((p, i) => ({ p, i }))
     .filter(({ p, i }) => i !== player.currentPokemon && !p.dying);
   const question = `どのポケモンにする？ ${pokemons
-    .map(({ p, i }) => `[${i}] => ${p.name}`)
-    .join(", ")}, [-1] 戻る`;
+    .map(({ p, i }) => `[${i + 1}] => ${p.name}`)
+    .join(", ")}, [-1] 戻る >> `;
 
   return await read<Command | null>(question, (answer) => {
     if (answer === "-1") {
