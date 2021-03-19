@@ -1,6 +1,6 @@
 import { run } from "@/domain/controller/battle";
 import { currentPokemon } from "@/domain/controller/player";
-import { Command, Progress } from "@/domain/model/battle";
+import { Commands, Progress } from "@/domain/model/battle";
 import { toString } from "@/domain/model/log";
 import {
   hail,
@@ -25,9 +25,9 @@ describe("battle", () => {
       environment: normalEnv,
       log: [],
     };
-    const command: Command = {
-      playerA: 0,
-      playerB: 0,
+    const command: Commands = {
+      playerA: { type: "fight", index: 0 },
+      playerB: { type: "fight", index: 0 },
     };
 
     const result = run(progress, command);
@@ -55,9 +55,9 @@ describe("battle", () => {
       environment: sunlight,
       log: [],
     };
-    const command: Command = {
-      playerA: 0,
-      playerB: 0,
+    const command: Commands = {
+      playerA: { type: "fight", index: 0 },
+      playerB: { type: "fight", index: 0 },
     };
 
     const result = run(progress, command);
@@ -87,9 +87,9 @@ describe("battle", () => {
       environment: sandstormMisty,
       log: [],
     };
-    const command: Command = {
-      playerA: 0,
-      playerB: 0,
+    const command: Commands = {
+      playerA: { type: "fight", index: 0 },
+      playerB: { type: "fight", index: 0 },
     };
 
     const result = run(progress, command);
@@ -124,12 +124,12 @@ describe("battle", () => {
       log: [],
     };
     progress = run(progress, {
-      playerA: 2,
-      playerB: 0,
+      playerA: { type: "fight", index: 2 },
+      playerB: { type: "fight", index: 0 },
     });
     progress = run(progress, {
-      playerA: 2,
-      playerB: 1,
+      playerA: { type: "fight", index: 2 },
+      playerB: { type: "fight", index: 1 },
     });
     expect(progress.log.map(toString)).toStrictEqual([
       "ピカチュウの でんこうせっか！",
@@ -156,12 +156,12 @@ describe("battle", () => {
       log: [],
     };
     progress = run(progress, {
-      playerA: 0,
-      playerB: 0,
+      playerA: { type: "fight", index: 0 },
+      playerB: { type: "fight", index: 0 },
     });
     progress = run(progress, {
-      playerA: 0,
-      playerB: 0,
+      playerA: { type: "fight", index: 0 },
+      playerB: { type: "fight", index: 0 },
     });
     expect(currentPokemon(progress.playerB).status.hp).toBe(0);
     expect(currentPokemon(progress.playerA).status.hp).not.toBe(0);
@@ -210,8 +210,8 @@ describe("battle", () => {
       log: [],
     };
     progress = run(progress, {
-      playerA: 0,
-      playerB: 0,
+      playerA: { type: "fight", index: 0 },
+      playerB: { type: "fight", index: 0 },
     });
     expect(progress.log.map(toString)).toStrictEqual([
       "リザードンの かえんしょうしゃ！",
@@ -255,8 +255,8 @@ describe("battle", () => {
       log: [],
     };
     let progress = run(beginning, {
-      playerA: 2,
-      playerB: 0,
+      playerA: { type: "fight", index: 2 },
+      playerB: { type: "fight", index: 0 },
     });
     expect(progress.log.map(toString)).toStrictEqual([
       "ピカチュウの でんこうせっか！",
@@ -265,14 +265,51 @@ describe("battle", () => {
       "shigeruとの 勝負に 勝った！",
     ]);
     progress = run(beginning, {
-      playerA: 0,
-      playerB: 1,
+      playerA: { type: "fight", index: 0 },
+      playerB: { type: "fight", index: 1 },
     });
     expect(progress.log.map(toString)).toStrictEqual([
       "マニューラの こおりのつぶて！",
       "ピカチュウは 78 ダメージ受けた！",
       "ピカチュウは たおれた！",
       "shigeruとの 勝負に 敗れた！",
+    ]);
+  });
+
+  test("ポケモンを交換できる", () => {
+    let progress: Progress = {
+      playerA: {
+        ...playerA,
+        pokemons: [kamex, pikachu],
+      },
+      playerB: {
+        ...playerB,
+        pokemons: [weavile, rizadon],
+      },
+      environment: normalEnv,
+      log: [],
+    };
+    progress = run(progress, {
+      playerA: { type: "change", index: 1 },
+      playerB: { type: "fight", index: 0 },
+    });
+    progress = run(progress, {
+      playerA: { type: "change", index: 0 },
+      playerB: { type: "change", index: 1 },
+    });
+    progress = run(progress, {
+      playerA: { type: "fight", index: 0 },
+      playerB: { type: "change", index: 0 },
+    });
+    expect(progress.log.map(toString)).toStrictEqual([
+      "satoshiは カメックスを引っ込めて ピカチュウを繰り出した！",
+      "マニューラの あくのはどう！",
+      "ピカチュウは 46 ダメージ受けた！",
+      "shigeruは マニューラを引っ込めて リザードンを繰り出した！",
+      "satoshiは ピカチュウを引っ込めて カメックスを繰り出した！",
+      "shigeruは リザードンを引っ込めて マニューラを繰り出した！",
+      "カメックスの なみのり！",
+      "マニューラは 61 ダメージ受けた！",
     ]);
   });
 });
