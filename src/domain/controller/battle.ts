@@ -37,11 +37,11 @@ const judge = (progress: Progress, playerKey: PlayerKey): Progress => {
   if (pokemon.dying || pokemon.status.hp) return progress;
 
   let log = add(progress.log, koLog(pokemon));
-  let winner: "A" | "B" | undefined = undefined;
+  let winner: "playerA" | "playerB" | undefined = undefined;
   const updatedPlayer = updatePokemon(player, { ...pokemon, dying: true });
   if (lose(updatedPlayer)) {
     log = add(log, resultLog(playerKey !== "playerA", progress.playerB));
-    winner = playerKey === "playerA" ? "A" : "B";
+    winner = playerKey === "playerA" ? "playerB" : "playerA";
   }
   return {
     ...progress,

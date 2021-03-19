@@ -14,5 +14,5 @@ export type Progress = {
   playerB: Player;
   environment: Environment;
   log: Log[];
-  winner?: "A" | "B";
+  winner?: "playerA" | "playerB";
 };
