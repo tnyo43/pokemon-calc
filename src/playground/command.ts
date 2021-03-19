@@ -79,7 +79,7 @@ const askChange = async (player: Player): Promise<Command | null> => {
 };
 
 export const ask = async (player: Player): Promise<Command> => {
-  console.log(`${player.name}は どうする？`);
+  console.log(`${player.name}の ${currentPokemon(player).name}は どうする？`);
 
   let command: Command | null = null;
   // eslint-disable-next-line no-constant-condition

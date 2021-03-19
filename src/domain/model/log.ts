@@ -1,4 +1,3 @@
-import { Pokemon } from "@/domain/model/pokemon";
 import { Weather } from "@/domain/model/environment";
 import { Player } from "@/domain/model/player";
 
@@ -9,55 +8,8 @@ export type Log =
   | { label: "weather"; weather: Weather; isEnd: boolean }
   | { label: "weather damage"; weather: Weather; name: string }
   | { label: "ko"; name: string }
-  | { label: "result"; win: boolean; opponent: Player };
-
-export const attackLog = (pokemon: Pokemon, moveIndex: number): Log => ({
-  label: "attack",
-  name: pokemon.name,
-  move: pokemon.moves[moveIndex].name,
-});
-
-export const damageLog = (pokemon: Pokemon, damage: number): Log => ({
-  label: "damage",
-  name: pokemon.name,
-  damage,
-});
-
-export const changeLog = (
-  player: Player,
-  changeFrom: number,
-  changeTo: number
-): Log => ({
-  label: "change",
-  player: player.name,
-  pokemonFrom: player.pokemons[changeFrom].name,
-  pokemonTo: player.pokemons[changeTo].name,
-});
-
-export const weatherLog = (weather: Weather, isEnd: boolean): Log => ({
-  label: "weather",
-  weather,
-  isEnd,
-});
-
-export const weatherDamageLog = (weather: Weather, pokemon: Pokemon): Log => ({
-  label: "weather damage",
-  weather,
-  name: pokemon.name,
-});
-
-export const koLog = (pokemon: Pokemon): Log => ({
-  label: "ko",
-  name: pokemon.name,
-});
-
-export const resultLog = (win: boolean, opponent: Player): Log => ({
-  label: "result",
-  win,
-  opponent,
-});
-
-export const add = (logs: Log[], log: Log) => logs.concat(log);
+  | { label: "result"; win: boolean; opponent: Player }
+  | { label: "turnend" };
 
 const toStringAttack = ({ name, move }: { name: string; move: string }) =>
   `${name}の ${move}！`;
@@ -116,6 +68,8 @@ const toStringResult = ({
   opponent: Player;
 }) => `${opponent.name}との 勝負に ${win ? "勝った" : "敗れた"}！`;
 
+const toStringTurnEnd = (_: Log) => "";
+
 export const toString = (log: Log): string => {
   switch (log.label) {
     case "attack":
@@ -132,5 +86,7 @@ export const toString = (log: Log): string => {
       return toStringKO(log);
     case "result":
       return toStringResult(log);
+    case "turnend":
+      return toStringTurnEnd(log);
   }
 };

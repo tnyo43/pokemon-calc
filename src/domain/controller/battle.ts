@@ -8,9 +8,10 @@ import {
   damageLog,
   koLog,
   resultLog,
+  turnendLog,
   weatherDamageLog,
   weatherLog,
-} from "@/domain/model/log";
+} from "@/domain/controller/log";
 import {
   updatePokemon,
   currentPokemon,
@@ -221,5 +222,9 @@ export const run = (progress: Progress, command: Commands): Progress => {
   moves.forEach(({ isA }) => (progResult = attack(progResult, isA, command)));
 
   progResult = updateEnvironment(progResult);
-  return progResult;
+
+  return {
+    ...progResult,
+    log: add(progResult.log, turnendLog()),
+  };
 };
