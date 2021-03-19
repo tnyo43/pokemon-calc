@@ -1,5 +1,5 @@
 import { Command, Progress } from "@/domain/model/battle";
-import { damage, speed, updateStatus } from "@/domain/controller/pokemon";
+import { beHurt, damage, speed } from "@/domain/controller/pokemon";
 import { probability } from "@/utils";
 import { next, damage as weatherDamage } from "@/domain/controller/environment";
 import { Pokemon } from "@/domain/model/pokemon";
@@ -9,18 +9,23 @@ import {
   damageLog,
   koLog,
   Log,
+  resultLog,
   weatherDamageLog,
   weatherLog,
 } from "@/domain/model/log";
 import { priority } from "@/domain/controller/move";
-import { updatePokemon, currentPokemon } from "@/domain/controller/player";
+import {
+  updatePokemon,
+  currentPokemon,
+  lose,
+  needToChange,
+} from "@/domain/controller/player";
 
 type Action = { isAttackerA: boolean; moveIndex: number };
 
-const beHurt = (pokemon: Pokemon, damage: number) =>
-  updateStatus(pokemon, { hp: -damage });
-
 const attack = (progress: Progress, action: Action): Progress => {
+  if (progress.winner) return progress;
+
   const { playerA, playerB, environment } = progress;
   const [pokemonA, pokemonB] = [
     currentPokemon(playerA),
@@ -51,7 +56,12 @@ const attack = (progress: Progress, action: Action): Progress => {
   };
 };
 
-const updateEnvironment = (progress: Progress, isFirstA: boolean): Progress => {
+const updateEnvironment = (
+  progress: Progress,
+  isAFaster: boolean
+): Progress => {
+  if (progress.winner) return progress;
+
   const { playerA, playerB, environment } = progress;
   let [pokemonA, pokemonB] = [currentPokemon(playerA), currentPokemon(playerB)];
 
@@ -75,7 +85,7 @@ const updateEnvironment = (progress: Progress, isFirstA: boolean): Progress => {
   };
 
   if (weather) {
-    if (isFirstA) {
+    if (isAFaster) {
       [pokemonA, log] = beHurtByWeather(pokemonA, log);
       [pokemonB, log] = beHurtByWeather(pokemonB, log);
     } else {
@@ -92,7 +102,34 @@ const updateEnvironment = (progress: Progress, isFirstA: boolean): Progress => {
   };
 };
 
+const judge = (
+  progress: Progress,
+  playerKey: "playerA" | "playerB"
+): Progress => {
+  if (progress.winner) return progress;
+
+  const player = progress[playerKey];
+  const pokemon = currentPokemon(player);
+  if (pokemon.dying || pokemon.status.hp) return progress;
+
+  let log = add(progress.log, koLog(pokemon));
+  let winner: "A" | "B" | undefined = undefined;
+  const updatedPlayer = updatePokemon(player, { ...pokemon, dying: true });
+  if (lose(updatedPlayer)) {
+    log = add(log, resultLog(playerKey !== "playerA", progress.playerB));
+    winner = playerKey === "playerA" ? "A" : "B";
+  }
+  return {
+    ...progress,
+    [playerKey]: updatedPlayer,
+    log,
+    winner,
+  };
+};
+
 export const run = (progress: Progress, command: Command): Progress => {
+  if (progress.winner) return progress;
+
   const { playerA, playerB } = progress;
   const [pokemonA, pokemonB] = [
     currentPokemon(playerA),
@@ -104,45 +141,31 @@ export const run = (progress: Progress, command: Command): Progress => {
   ];
   const priorityDiff = priority(moveA) - priority(moveB);
   const speedDiff = speed(pokemonA) - speed(pokemonB);
-  const isFirstA =
+  const isAFaster =
     priorityDiff > 0 ||
     (priorityDiff === 0 &&
       (speedDiff > 0 || (speedDiff === 0 && probability(0.5))));
-  const [first, second]: ("playerA" | "playerB")[] = isFirstA
+  const [first, second]: ("playerA" | "playerB")[] = isAFaster
     ? ["playerA", "playerB"]
     : ["playerB", "playerA"];
 
-  const judge = (
-    progress: Progress,
-    playerKey: "playerA" | "playerB"
-  ): Progress => {
-    const player = progress[playerKey];
-    const poke = currentPokemon(player);
-    if (poke.dying || poke.status.hp) return progress;
-    return {
-      ...progress,
-      [playerKey]: updatePokemon(player, { ...poke, dying: true }),
-      log: add(progress.log, koLog(poke)),
-    };
-  };
-
   let progResult = attack(progress, {
-    isAttackerA: isFirstA,
+    isAttackerA: isAFaster,
     moveIndex: command[first],
   });
   progResult = judge(progResult, second);
   progResult = judge(progResult, first);
 
-  if (!currentPokemon(progResult[second]).dying) {
+  if (!needToChange(progResult[second])) {
     progResult = attack(progResult, {
-      isAttackerA: !isFirstA,
+      isAttackerA: !isAFaster,
       moveIndex: command[second],
     });
     progResult = judge(progResult, first);
     progResult = judge(progResult, second);
   }
 
-  progResult = updateEnvironment(progResult, isFirstA);
+  progResult = updateEnvironment(progResult, isAFaster);
   progResult = judge(progResult, first);
   progResult = judge(progResult, second);
   return progResult;

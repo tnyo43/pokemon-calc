@@ -114,7 +114,7 @@ describe("battle", () => {
     let progress: Progress = {
       playerA: {
         ...playerA,
-        pokemons: [pikachu],
+        pokemons: [pikachu, rizadon],
       },
       playerB: {
         ...playerB,
@@ -150,7 +150,7 @@ describe("battle", () => {
       },
       playerB: {
         ...playerB,
-        pokemons: [rizadon],
+        pokemons: [rizadon, pikachu],
       },
       environment: normalEnv,
       log: [],
@@ -190,6 +190,7 @@ describe("battle", () => {
               hp: 32,
             },
           },
+          pikachu,
         ],
       },
       playerB: {
@@ -202,6 +203,7 @@ describe("battle", () => {
               hp: 100,
             },
           },
+          weavile,
         ],
       },
       environment: hail,
@@ -220,6 +222,57 @@ describe("battle", () => {
       "あられが 降りつづけている",
       "あられが カメックスを おそう！",
       "カメックスは たおれた！",
+    ]);
+  });
+
+  test("試合結果のログが追加される", () => {
+    const beginning: Progress = {
+      playerA: {
+        ...playerA,
+        pokemons: [
+          {
+            ...pikachu,
+            status: {
+              ...pikachu.status,
+              hp: 1,
+            },
+          },
+        ],
+      },
+      playerB: {
+        ...playerB,
+        pokemons: [
+          {
+            ...weavile,
+            status: {
+              ...weavile.status,
+              hp: 1,
+            },
+          },
+        ],
+      },
+      environment: hail,
+      log: [],
+    };
+    let progress = run(beginning, {
+      playerA: 2,
+      playerB: 0,
+    });
+    expect(progress.log.map(toString)).toStrictEqual([
+      "ピカチュウの でんこうせっか！",
+      "マニューラは 24 ダメージ受けた！",
+      "マニューラは たおれた！",
+      "shigeruとの 勝負に 勝った！",
+    ]);
+    progress = run(beginning, {
+      playerA: 0,
+      playerB: 1,
+    });
+    expect(progress.log.map(toString)).toStrictEqual([
+      "マニューラの こおりのつぶて！",
+      "ピカチュウは 78 ダメージ受けた！",
+      "ピカチュウは たおれた！",
+      "shigeruとの 勝負に 敗れた！",
     ]);
   });
 });

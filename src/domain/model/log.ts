@@ -1,12 +1,14 @@
 import { Pokemon } from "@/domain/model/pokemon";
 import { Weather } from "@/domain/model/environment";
+import { Player } from "@/domain/model/player";
 
 export type Log =
   | { label: "attack"; name: string; move: string }
   | { label: "damage"; name: string; damage: number }
   | { label: "weather"; weather: Weather; isEnd: boolean }
   | { label: "weather damage"; weather: Weather; name: string }
-  | { label: "ko"; name: string };
+  | { label: "ko"; name: string }
+  | { label: "result"; win: boolean; opponent: Player };
 
 export const attackLog = (pokemon: Pokemon, moveIndex: number): Log => ({
   label: "attack",
@@ -35,6 +37,12 @@ export const weatherDamageLog = (weather: Weather, pokemon: Pokemon): Log => ({
 export const koLog = (pokemon: Pokemon): Log => ({
   label: "ko",
   name: pokemon.name,
+});
+
+export const resultLog = (win: boolean, opponent: Player): Log => ({
+  label: "result",
+  win,
+  opponent,
 });
 
 export const add = (logs: Log[], log: Log) => logs.concat(log);
@@ -78,6 +86,14 @@ const toStringWeatherDamage = ({
 
 const toStringKO = ({ name }: { name: string }) => `${name}は たおれた！`;
 
+const toStringResult = ({
+  win,
+  opponent,
+}: {
+  win: boolean;
+  opponent: Player;
+}) => `${opponent.name}との 勝負に ${win ? "勝った" : "敗れた"}！`;
+
 export const toString = (log: Log): string => {
   switch (log.label) {
     case "attack":
@@ -90,5 +106,7 @@ export const toString = (log: Log): string => {
       return toStringWeatherDamage(log);
     case "ko":
       return toStringKO(log);
+    case "result":
+      return toStringResult(log);
   }
 };

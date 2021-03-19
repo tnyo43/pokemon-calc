@@ -1,5 +1,5 @@
 import { Characteristic } from "@/domain/model/characteristic";
-import { Move, MoveIndex } from "@/domain/model/move";
+import { Move } from "@/domain/model/move";
 import { PokedexInfo, Pokemon } from "@/domain/model/pokemon";
 import { Statistics, StatisticsType, Status } from "@/domain/model/stats";
 import { Type } from "@/domain/model/type";
@@ -140,7 +140,7 @@ const typeCoefficient = (pokemon: Pokemon, move: Move) =>
   hasType(pokemon, move.type) ? 1.5 : 1;
 
 export const damage = (
-  index: MoveIndex,
+  index: number,
   attacker: Pokemon,
   defencer: Pokemon,
   environment?: Environment
@@ -190,6 +190,9 @@ export const updateStatus = (
     status: nextStatus,
   };
 };
+
+export const beHurt = (pokemon: Pokemon, damage: number) =>
+  updateStatus(pokemon, { hp: -damage });
 
 export const pokemon = (
   pokeInfo: PokedexInfo,
