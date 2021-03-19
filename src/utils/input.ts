@@ -15,3 +15,11 @@ export const read = <T>(
     });
   });
 };
+
+export const validIndex = (
+  candidate: number[],
+  answer: string
+): number | null => {
+  const index = Number(answer) - 1;
+  return !isNaN(index) && candidate.some((i) => i === index) ? index : null;
+};

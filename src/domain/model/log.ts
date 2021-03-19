@@ -8,6 +8,7 @@ export type Log =
   | { label: "weather"; weather: Weather; isEnd: boolean }
   | { label: "weather damage"; weather: Weather; name: string }
   | { label: "ko"; name: string }
+  | { label: "prepare"; name: string; pokemon: string }
   | { label: "result"; win: boolean; opponent: Player }
   | { label: "turnend" };
 
@@ -60,6 +61,14 @@ const toStringWeatherDamage = ({
 
 const toStringKO = ({ name }: { name: string }) => `${name}は たおれた！`;
 
+const toStringPrepare = ({
+  name,
+  pokemon,
+}: {
+  name: string;
+  pokemon: string;
+}) => `${name}は ${pokemon}を繰り出した！`;
+
 const toStringResult = ({
   win,
   opponent,
@@ -84,6 +93,8 @@ export const toString = (log: Log): string => {
       return toStringWeatherDamage(log);
     case "ko":
       return toStringKO(log);
+    case "prepare":
+      return toStringPrepare(log);
     case "result":
       return toStringResult(log);
     case "turnend":

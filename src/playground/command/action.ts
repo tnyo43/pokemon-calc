@@ -1,17 +1,12 @@
 import { Player } from "@/domain/model/player";
 import { currentPokemon } from "@/domain/controller/player";
-import { Command } from "@/domain/model/battle";
-import { read } from "@/utils/input";
+import { ActionCommand } from "@/domain/model/battle";
+import { read, validIndex } from "@/utils/input";
 
-const initialCommand: Command | null = null;
+const initialCommand: ActionCommand | null = null;
 
-const validIndex = (candidate: number[], answer: string): number | null => {
-  const index = Number(answer) - 1;
-  return !isNaN(index) && candidate.some((i) => i === index) ? index : null;
-};
-
-const askType = async (): Promise<Command | null> =>
-  await read<Command | null>(
+const askType = async (): Promise<ActionCommand | null> =>
+  await read<ActionCommand | null>(
     "たたかう(fight) or 交換する(change)？ [f/c] >> ",
     (answer) => {
       switch (answer.toLowerCase()) {
@@ -28,13 +23,13 @@ const askType = async (): Promise<Command | null> =>
     }
   );
 
-const askMove = async (player: Player): Promise<Command | null> => {
+const askMove = async (player: Player): Promise<ActionCommand | null> => {
   const moves = currentPokemon(player).moves;
   const question = `どの技にする？ ${moves
     .map((move, i) => `[${i + 1}] ${move.name}`)
     .join(", ")}, [-1] 戻る >> `;
 
-  return await read<Command | null>(question, (answer) => {
+  return await read<ActionCommand | null>(question, (answer) => {
     if (answer === "-1") {
       console.log("戻る");
       return null;
@@ -52,7 +47,7 @@ const askMove = async (player: Player): Promise<Command | null> => {
   });
 };
 
-const askChange = async (player: Player): Promise<Command | null> => {
+const askChange = async (player: Player): Promise<ActionCommand | null> => {
   const pokemons = player.pokemons
     .map((p, i) => ({ p, i }))
     .filter(({ p, i }) => i !== player.currentPokemon && !p.dying);
@@ -60,7 +55,7 @@ const askChange = async (player: Player): Promise<Command | null> => {
     .map(({ p, i }) => `[${i + 1}] => ${p.name}`)
     .join(", ")}, [-1] 戻る >> `;
 
-  return await read<Command | null>(question, (answer) => {
+  return await read<ActionCommand | null>(question, (answer) => {
     if (answer === "-1") {
       console.log("戻る");
       return null;
@@ -78,10 +73,10 @@ const askChange = async (player: Player): Promise<Command | null> => {
   });
 };
 
-export const ask = async (player: Player): Promise<Command> => {
+export const ask = async (player: Player): Promise<ActionCommand> => {
   console.log(`${player.name}の ${currentPokemon(player).name}は どうする？`);
 
-  let command: Command | null = null;
+  let command: ActionCommand | null = null;
   // eslint-disable-next-line no-constant-condition
   while (true) {
     if (command === null) {

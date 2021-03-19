@@ -1,4 +1,8 @@
-import { Commands, Progress } from "@/domain/model/battle";
+import {
+  ActionCommandSet,
+  PrepareCommandSet,
+  Progress,
+} from "@/domain/model/battle";
 import { beHurt, damage, speed as getSpeed } from "@/domain/controller/pokemon";
 import { next, damage as weatherDamage } from "@/domain/controller/environment";
 import {
@@ -7,6 +11,7 @@ import {
   changeLog,
   damageLog,
   koLog,
+  prepareLog,
   resultLog,
   turnendLog,
   weatherDamageLog,
@@ -21,6 +26,8 @@ import {
 import { Player } from "@/domain/model/player";
 
 type PlayerKey = "playerA" | "playerB";
+
+const playerKeys: PlayerKey[] = ["playerA", "playerB"];
 
 const isAFaster = (progress: Progress): boolean => {
   const [pokemonA, pokemonB] = [
@@ -54,7 +61,7 @@ const judge = (progress: Progress, playerKey: PlayerKey): Progress => {
 
 const sortedMoves = (
   progress: Progress,
-  command: Commands
+  command: ActionCommandSet
 ): { isA: boolean }[] => {
   const priorityRatio = 1000;
 
@@ -85,7 +92,7 @@ const sortedMoves = (
 const attack = (
   progress: Progress,
   isAttackerA: boolean,
-  command: Commands
+  command: ActionCommandSet
 ): Progress => {
   const { playerA, playerB, environment } = progress;
   const [pokemonA, pokemonB] = [
@@ -183,7 +190,10 @@ const updateEnvironment = (progress: Progress): Progress => {
   };
 };
 
-const changePokemon = (progress: Progress, command: Commands): Progress => {
+const changePokemon = (
+  progress: Progress,
+  command: ActionCommandSet
+): Progress => {
   const change = (progress: Progress, playerKey: PlayerKey): Progress => {
     if (command[playerKey].type !== "change") return progress;
 
@@ -212,7 +222,10 @@ const changePokemon = (progress: Progress, command: Commands): Progress => {
   return progResult;
 };
 
-export const run = (progress: Progress, command: Commands): Progress => {
+export const runAction = (
+  progress: Progress,
+  command: ActionCommandSet
+): Progress => {
   if (progress.winner) return progress;
 
   let progResult = progress;
@@ -227,4 +240,28 @@ export const run = (progress: Progress, command: Commands): Progress => {
     ...progResult,
     log: add(progResult.log, turnendLog()),
   };
+};
+
+export const runPrepare = (
+  progress: Progress,
+  command: PrepareCommandSet
+): Progress => {
+  let progResult = progress;
+  playerKeys.forEach((playerKey) => {
+    const index = command[playerKey]?.index;
+    const player = progress[playerKey];
+    if (index) {
+      progResult = {
+        ...progResult,
+        [playerKey]: {
+          ...player,
+          currentPokemon: index,
+        },
+        log: add(progress.log, prepareLog(player, index)),
+      };
+    }
+  });
+  if (command !== {})
+    progResult = { ...progResult, log: add(progResult.log, turnendLog()) };
+  return progResult;
 };

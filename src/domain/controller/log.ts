@@ -52,6 +52,12 @@ export const koLog = (pokemon: Pokemon): Log => ({
   name: pokemon.name,
 });
 
+export const prepareLog = (player: Player, index: number): Log => ({
+  label: "prepare",
+  name: player.name,
+  pokemon: player.pokemons[index].name,
+});
+
 export const resultLog = (win: boolean, opponent: Player): Log => ({
   label: "result",
   win,
