@@ -141,3 +141,36 @@ export const darkPulse: Move = {
   moveType: "special",
   contact: false,
 };
+
+export const growl: Move = {
+  name: "なきごえ",
+  type: "normal",
+  pp: 40,
+  moveType: "helping",
+  accuracy: 100,
+  statusDiff: {
+    opponent: { attack: -1 },
+  },
+};
+
+export const ironDefence: Move = {
+  name: "てっぺき",
+  type: "steel",
+  pp: 15,
+  moveType: "helping",
+  accuracy: 100,
+  statusDiff: {
+    own: { defence: 2 },
+  },
+};
+
+export const bellyDrum: Move = {
+  name: "はらだいこ",
+  type: "normal",
+  pp: 10,
+  moveType: "helping",
+  accuracy: 100,
+  statusDiff: {
+    own: { attack: 12, hpRate: -0.5 },
+  },
+};

@@ -1,9 +1,14 @@
 import { Weather } from "@/domain/model/environment";
 import { Player } from "@/domain/model/player";
+import {
+  StatusType,
+  toString as toStringStatusParam,
+} from "@/domain/model/stats";
 
 export type Log =
   | { label: "attack"; name: string; move: string }
   | { label: "damage"; name: string; damage: number }
+  | { label: "status"; name: string; param: StatusType; diff: number }
   | { label: "change"; player: string; pokemonFrom: string; pokemonTo: string }
   | { label: "weather"; weather: Weather; isEnd: boolean }
   | { label: "weather damage"; weather: Weather; name: string }
@@ -17,6 +22,31 @@ const toStringAttack = ({ name, move }: { name: string; move: string }) =>
 
 const toStringDamage = ({ name, damage }: { name: string; damage: number }) =>
   `${name}は ${damage} ダメージ受けた！`;
+
+const toStringStatus = ({
+  name,
+  param,
+  diff,
+}: {
+  name: string;
+  param: StatusType;
+  diff: number;
+}) =>
+  `${name}の ${toStringStatusParam(param)}が ${
+    diff === 12
+      ? "最大まで上がった"
+      : diff === 1
+      ? "上がった"
+      : diff === 2
+      ? "ぐーんと上がった"
+      : diff > 2
+      ? "ぐぐーんと上がった"
+      : diff === -1
+      ? "下がった"
+      : diff === -2
+      ? "がくっと下がった"
+      : "がくーんと下がった"
+  }`;
 
 const toStringChange = ({
   player,
@@ -85,6 +115,8 @@ export const toString = (log: Log): string => {
       return toStringAttack(log);
     case "damage":
       return toStringDamage(log);
+    case "status":
+      return toStringStatus(log);
     case "change":
       return toStringChange(log);
     case "weather":

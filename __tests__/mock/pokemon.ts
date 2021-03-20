@@ -3,6 +3,20 @@ import { pokemon } from "@/domain/controller/pokemon";
 import { statistics } from "@/domain/controller/stats";
 import * as Pokedex from "__tests__/mock/pokedexInfo";
 import * as Moves from "__tests__/mock/moves";
+import { Environment } from "@/domain/model/environment";
+import { damage as damageSub } from "@/domain/controller/pokemon";
+
+export const damage = (
+  index: number,
+  attacker: Pokemon,
+  defencer: Pokemon,
+  env?: Environment
+) => {
+  const move = attacker.moves[index];
+  return move.moveType === "helping"
+    ? 0
+    : damageSub(move, attacker, defencer, env);
+};
 
 export const fushigibana: Pokemon = pokemon(
   Pokedex.fushigibana,
@@ -17,7 +31,7 @@ export const fushigibana: Pokemon = pokemon(
 export const rizadon: Pokemon = pokemon(
   Pokedex.rizadon,
   50,
-  [Moves.flamethrower, Moves.flareBlitz, Moves.dragonClaw],
+  [Moves.flamethrower, Moves.flareBlitz, Moves.growl, Moves.bellyDrum],
   0,
   statistics(0, 0, 0, 0, 0, 0),
   statistics(31, 31, 31, 31, 31, 31),
@@ -27,7 +41,7 @@ export const rizadon: Pokemon = pokemon(
 export const kamex: Pokemon = pokemon(
   Pokedex.kamex,
   50,
-  [Moves.surf, Moves.dragonPulse],
+  [Moves.surf, Moves.dragonPulse, Moves.ironDefence],
   0,
   statistics(0, 0, 0, 0, 0, 0),
   statistics(31, 31, 31, 31, 31, 31),

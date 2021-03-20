@@ -365,4 +365,44 @@ describe("battle", () => {
       "",
     ]);
   });
+
+  test("バフ技でステータスが変化する", () => {
+    let progress: Progress = {
+      playerA: {
+        ...playerA,
+        pokemons: [kamex],
+      },
+      playerB: {
+        ...playerB,
+        pokemons: [rizadon],
+      },
+      environment: normalEnv,
+      log: [],
+    };
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 2 },
+      playerB: { type: "fight", index: 3 },
+    });
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 2 },
+      playerB: { type: "fight", index: 2 },
+    });
+    expect(progress.log.map(toString)).toStrictEqual([
+      "リザードンの はらだいこ！",
+      "リザードンの 攻撃が 最大まで上がった",
+      "リザードンの 体力が がくーんと下がった",
+      "カメックスの てっぺき！",
+      "カメックスの 防御が ぐーんと上がった",
+      "",
+      "リザードンの なきごえ！",
+      "カメックスの 攻撃が 下がった",
+      "カメックスの てっぺき！",
+      "カメックスの 防御が ぐーんと上がった",
+      "",
+    ]);
+    expect(currentPokemon(progress.playerA).status.defence).toBe(4);
+    expect(currentPokemon(progress.playerA).status.attack).toBe(-1);
+    expect(currentPokemon(progress.playerB).status.attack).toBe(6);
+    expect(currentPokemon(progress.playerB).status.hp).toBe(76);
+  });
 });

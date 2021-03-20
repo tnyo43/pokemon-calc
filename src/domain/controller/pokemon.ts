@@ -1,5 +1,5 @@
 import { Characteristic } from "@/domain/model/characteristic";
-import { Move } from "@/domain/model/move";
+import { AttackMove, BuffStatus, Move } from "@/domain/model/move";
 import { PokedexInfo, Pokemon } from "@/domain/model/pokemon";
 import { Statistics, StatisticsType, Status } from "@/domain/model/stats";
 import { Type } from "@/domain/model/type";
@@ -111,7 +111,7 @@ const specialDefenceWithEnv = (
   return Math.floor(coeff * specialDefence(pokemon));
 };
 
-const power = (move: Move, environment?: Environment) => {
+const power = (move: AttackMove, environment?: Environment) => {
   const powerCoeficient = !environment
     ? 1
     : (move.type === "electric" && isTerrainActive(environment, "electric")) ||
@@ -141,13 +141,11 @@ const typeCoefficient = (pokemon: Pokemon, move: Move) =>
   hasType(pokemon, move.type) ? 1.5 : 1;
 
 export const damage = (
-  index: number,
+  move: AttackMove,
   attacker: Pokemon,
   defencer: Pokemon,
   environment?: Environment
 ) => {
-  const move = attacker.moves[index];
-  if (move.moveType === "helping") return 0;
   const [attackFuncion, defenceFunction] =
     move.moveType === "physical"
       ? [attack, defenceWithEnv]
@@ -167,6 +165,18 @@ export const damage = (
         typeCoefficient(attacker, move)
     ) * compatibility(move.type, defencer.types)
   );
+};
+
+export const convertStatus = (
+  pokemon: Pokemon,
+  status: Partial<BuffStatus>
+): Partial<Status> => {
+  if (status.hpRate) {
+    status.hp = Math.floor(pokemon.basicValue.hp * status.hpRate);
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { hpRate, ...result } = status;
+  return result;
 };
 
 export const updateStatus = (
