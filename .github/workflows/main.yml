@@ -2,36 +2,28 @@ name: CI
 
 on:
   push:
-    branches: [ '**' ]
+    branches: ["**"]
   pull_request:
-    branches: [ '**' ]
+    branches: ["**"]
 
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v1
+
       - name: Setup NodeJs
         uses: actions/setup-node@v1
         with:
-          node-version: '14.11.0'
+          node-version: "14.11.0"
+
       - name: Install Dependencies
-        run: npm run install
+        run: npm install
+
       - name: Run build
         run: npm build
-  test:
-    runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup NodeJs
-        uses: actions/setup-node@v1
-        with:
-          node-version: '14.11.0'
-      - name: Install Dependencies
-        run: npm run install
       - name: Run test
         run: npm test
