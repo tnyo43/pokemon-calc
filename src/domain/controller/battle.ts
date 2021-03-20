@@ -3,7 +3,12 @@ import {
   PrepareCommandSet,
   Progress,
 } from "@/domain/model/battle";
-import { beHurt, damage, speed as getSpeed } from "@/domain/controller/pokemon";
+import {
+  beHurt,
+  damage,
+  reducePP,
+  speed as getSpeed,
+} from "@/domain/controller/pokemon";
 import { next, damage as weatherDamage } from "@/domain/controller/environment";
 import {
   add,
@@ -127,8 +132,13 @@ const attack = (
   let progressResult = {
     ...progress,
     log,
+    [attacker]: updatePokemon(
+      progress[attacker],
+      reducePP(attackPokemon, moveIndex, 1)
+    ),
     [defencer]: defencedPlayer,
   };
+
   progressResult = judge(progressResult, defencer);
   progressResult = judge(progressResult, attacker);
   return progressResult;

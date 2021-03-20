@@ -171,10 +171,10 @@ export const damage = (
 
 export const updateStatus = (
   pokemon: Pokemon,
-  diffStatus: Partial<Status>
+  diffStatus: Partial<Omit<Status, "pp">>
 ): Pokemon => {
   const nextStatus = (Object.entries(diffStatus) as [
-    keyof Status,
+    keyof Omit<Status, "pp">,
     number
   ][]).reduce((accStatus, [key, diff]) => {
     const [max, min] = key === "hp" ? [pokemon.basicValue.hp, 0] : [6, -6];
@@ -191,6 +191,23 @@ export const updateStatus = (
     status: nextStatus,
   };
 };
+
+export const reducePP = (
+  pokemon: Pokemon,
+  index: number,
+  count: number
+): Pokemon => ({
+  ...pokemon,
+  status: {
+    ...pokemon.status,
+    pp: pokemon.status.pp.map((p, i) =>
+      i === index ? Math.max(0, p - count) : p
+    ),
+  },
+});
+
+export const canMove = (pokemon: Pokemon, index: number) =>
+  pokemon.status.pp[index] > 0;
 
 export const beHurt = (pokemon: Pokemon, damage: number) =>
   updateStatus(pokemon, { hp: -damage });
@@ -219,6 +236,7 @@ export const pokemon = (
     speed: 0,
     evasion: 0,
     accuracy: 0,
+    pp: moves.map((m) => m.pp),
   };
   const params = {
     baseStats: pokeInfo.baseStats,

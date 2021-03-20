@@ -4,6 +4,8 @@ import {
   specialAttack,
   damage,
   updateStatus,
+  canMove,
+  reducePP,
 } from "@/domain/controller/pokemon";
 import { fushigibana, kamex, pikachu, rizadon } from "__tests__/mock/pokemon";
 import { Pokemon } from "@/domain/model/pokemon";
@@ -82,5 +84,13 @@ describe("pokemon", () => {
       expect(defence(p2)).toBe(15);
       expect(specialAttack(p2)).toBe(252);
     });
+  });
+
+  describe("ppが0になると技が出せなくなる", () => {
+    let p = pikachu;
+    expect(canMove(p, 0)).toBe(true);
+
+    p = reducePP(p, 0, 15);
+    expect(canMove(p, 0)).toBe(false);
   });
 });

@@ -2,6 +2,7 @@ import { Player } from "@/domain/model/player";
 import { currentPokemon } from "@/domain/controller/player";
 import { ActionCommand } from "@/domain/model/battle";
 import { read, validIndex } from "@/utils/input";
+import { canMove } from "@/domain/controller/pokemon";
 
 const initialCommand: ActionCommand | null = null;
 
@@ -24,9 +25,12 @@ const askType = async (): Promise<ActionCommand | null> =>
   );
 
 const askMove = async (player: Player): Promise<ActionCommand | null> => {
-  const moves = currentPokemon(player).moves;
+  const pokemon = currentPokemon(player);
+  const moves = pokemon.moves
+    .map((m, i) => ({ m, i }))
+    .filter(({ i }) => canMove(pokemon, i));
   const question = `どの技にする？ ${moves
-    .map((move, i) => `[${i + 1}] ${move.name}`)
+    .map(({ m, i }) => `[${i + 1}] ${m.name}(${pokemon.status.pp[i]}/${m.pp})`)
     .join(", ")}, [-1] 戻る >> `;
 
   return await read<ActionCommand | null>(question, (answer) => {
@@ -39,7 +43,7 @@ const askMove = async (player: Player): Promise<ActionCommand | null> => {
       answer
     );
     if (index !== null) {
-      console.log(moves[index].name);
+      console.log(moves[index].m.name);
       return { type: "fight", index };
     }
     console.log("もう一度入力してください");

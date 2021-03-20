@@ -14,4 +14,6 @@ export type Statistics = {
 
 export type Status = {
   [key in StatusType]: number;
+} & {
+  pp: number[];
 };
