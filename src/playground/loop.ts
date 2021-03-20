@@ -1,6 +1,7 @@
 import { PrepareCommandSet, Progress } from "@/domain/model/battle";
 import { Environment } from "@/domain/model/environment";
 import { Player } from "@/domain/model/player";
+import { display as displayPlayer } from "@/domain/controller/player";
 import * as Action from "@/playground/command/action";
 import * as Prepare from "@/playground/command/prepare";
 import { runAction, runPrepare } from "@/domain/controller/battle";
@@ -19,6 +20,9 @@ export const run = async (
   };
 
   while (!progress.winner) {
+    displayPlayer(progress.playerA);
+    displayPlayer(progress.playerB);
+
     const commandA = await Action.ask(progress.playerA);
     const commandB = await Action.ask(progress.playerB);
     progress = runAction(progress, { playerA: commandA, playerB: commandB });

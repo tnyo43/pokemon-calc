@@ -1,10 +1,10 @@
-import { Config } from "@/domain/config/log";
+import { Config, defaultConfig } from "@/domain/config/log";
 import { Weather } from "@/domain/model/environment";
 import { Log, toString } from "@/domain/model/log";
 import { Player } from "@/domain/model/player";
 import { Pokemon } from "@/domain/model/pokemon";
 
-let config: Config = { debug: false };
+let config = defaultConfig;
 
 export const apply = ({ log }: { log: Config }) => {
   config = log;

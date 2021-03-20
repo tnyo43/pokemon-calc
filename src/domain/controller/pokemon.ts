@@ -9,6 +9,7 @@ import {
   isTerrainActive,
   isWeatherActive,
 } from "@/domain/controller/environment";
+import { plusMinusNumber as pm } from "@/utils/format";
 
 type CalcParams = {
   baseStats: Statistics;
@@ -247,4 +248,26 @@ export const pokemon = (
     },
     dying: false,
   };
+};
+
+export const displayStatus = (pokemon: Pokemon, prefix?: string) => {
+  const {
+    attack,
+    defence,
+    specialAttack,
+    specialDefence,
+    speed,
+    evasion,
+    accuracy,
+  } = pokemon.status;
+  console.log(
+    prefix +
+      `A: ${pm(attack)},   B: ${pm(defence)},   C: ${pm(
+        specialAttack
+      )},   D: ${pm(specialDefence)}`
+  );
+  console.log(
+    prefix +
+      `S: ${pm(speed)}, evasion: ${pm(evasion)}, accuracy: ${pm(accuracy)}`
+  );
 };
