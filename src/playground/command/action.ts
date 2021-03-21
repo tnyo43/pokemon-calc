@@ -30,7 +30,7 @@ const askMove = async (player: Player): Promise<ActionCommand | null> => {
     .map((m, i) => ({ m, i }))
     .filter(({ i }) => canMove(pokemon, i));
   const question = `どの技にする？ ${moves
-    .map(({ m, i }) => `[${i + 1}] ${m.name}(${pokemon.status.pp[i]}/${m.pp})`)
+    .map(({ m, i }) => `[${i + 1}] ${m.name}(${pokemon.pp[i]}/${m.pp})`)
     .join(", ")}, [-1] 戻る >> `;
 
   return await read<ActionCommand | null>(question, (answer) => {

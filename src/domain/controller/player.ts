@@ -37,7 +37,7 @@ export const change = (player: Player, index: number) =>
     ? { succeed: false, player }
     : { succeed: true, player: { ...player, currentPokemon: index } };
 
-export const lose = (player: Player) => player.pokemons.every((p) => p.dying);
+export const isLose = (player: Player) => player.pokemons.every((p) => p.dying);
 
 export const display = (player: Player) => {
   if (!getConfig().debug) return;

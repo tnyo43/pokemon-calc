@@ -1,7 +1,8 @@
-import { runAction, runPrepare } from "@/domain/controller/battle";
+import { runAction } from "@/domain/controller/battle/action";
+import { passTurn, runPrepare } from "@/domain/controller/battle/turn";
 import { apply } from "@/domain/controller/move";
 import { currentPokemon } from "@/domain/controller/player";
-import { ActionCommandSet, Progress } from "@/domain/model/battle";
+import { Progress } from "@/domain/model/battle";
 import { toString } from "@/domain/model/log";
 import {
   hail,
@@ -25,7 +26,7 @@ describe("battle", () => {
   });
 
   test("天候なし、通常の攻撃のやりとり", () => {
-    const progress: Progress = {
+    let progress: Progress = {
       playerA: {
         ...playerA,
         pokemons: [rizadon],
@@ -37,26 +38,23 @@ describe("battle", () => {
       environment: normalEnv,
       log: [],
     };
-    const command: ActionCommandSet = {
+    progress = runAction(progress, {
       playerA: { type: "fight", index: 0 },
       playerB: { type: "fight", index: 0 },
-    };
-
-    const result = runAction(progress, command);
-    expect(currentPokemon(result.playerA).status.hp).toBe(31);
-    expect(currentPokemon(result.playerB).status.hp).toBe(123);
-    expect(result.environment).toStrictEqual(normalEnv);
-    expect(result.log.map(toString)).toStrictEqual([
+    });
+    expect(currentPokemon(progress.playerA).status.hp).toBe(31);
+    expect(currentPokemon(progress.playerB).status.hp).toBe(123);
+    expect(progress.environment).toStrictEqual(normalEnv);
+    expect(progress.log.map(toString)).toStrictEqual([
       "リザードンの かえんしょうしゃ！",
       "カメックスは 31 ダメージ受けた！",
       "カメックスの なみのり！",
       "リザードンは 122 ダメージ受けた！",
-      "",
     ]);
   });
 
   test("はれ", () => {
-    const progress: Progress = {
+    let progress: Progress = {
       playerA: {
         ...playerA,
         pokemons: [rizadon],
@@ -68,17 +66,16 @@ describe("battle", () => {
       environment: sunlight,
       log: [],
     };
-    const command: ActionCommandSet = {
+    progress = runAction(progress, {
       playerA: { type: "fight", index: 0 },
       playerB: { type: "fight", index: 0 },
-    };
-
-    const result = runAction(progress, command);
-    expect(result.environment.weather).toStrictEqual({
+    });
+    progress = passTurn(progress);
+    expect(progress.environment.weather).toStrictEqual({
       value: "sunlight",
       count: 4,
     });
-    expect(result.log.map(toString)).toStrictEqual([
+    expect(progress.log.map(toString)).toStrictEqual([
       "リザードンの かえんしょうしゃ！",
       "カメックスは 47 ダメージ受けた！",
       "カメックスの なみのり！",
@@ -89,7 +86,7 @@ describe("battle", () => {
   });
 
   test("すなあらしのダメージとターン経過", () => {
-    const progress: Progress = {
+    let progress: Progress = {
       playerA: {
         ...playerA,
         pokemons: [rizadon],
@@ -101,19 +98,19 @@ describe("battle", () => {
       environment: sandstormMisty,
       log: [],
     };
-    const command: ActionCommandSet = {
+
+    progress = runAction(progress, {
       playerA: { type: "fight", index: 0 },
       playerB: { type: "fight", index: 0 },
-    };
-
-    const result = runAction(progress, command);
-    expect(currentPokemon(result.playerA).status.hp).toBe(22);
-    expect(currentPokemon(result.playerB).status.hp).toBe(114);
-    expect(result.environment).toStrictEqual({
+    });
+    progress = passTurn(progress);
+    expect(currentPokemon(progress.playerA).status.hp).toBe(22);
+    expect(currentPokemon(progress.playerB).status.hp).toBe(114);
+    expect(progress.environment).toStrictEqual({
       weather: { value: "sandstorm", count: 4 },
       terrain: { value: "misty", count: 4 },
     });
-    expect(result.log.map(toString)).toStrictEqual([
+    expect(progress.log.map(toString)).toStrictEqual([
       "リザードンの かえんしょうしゃ！",
       "カメックスは 31 ダメージ受けた！",
       "カメックスの なみのり！",
@@ -142,10 +139,12 @@ describe("battle", () => {
       playerA: { type: "fight", index: 2 },
       playerB: { type: "fight", index: 0 },
     });
+    progress = passTurn(progress);
     progress = runAction(progress, {
       playerA: { type: "fight", index: 2 },
       playerB: { type: "fight", index: 1 },
     });
+    progress = passTurn(progress);
     expect(progress.log.map(toString)).toStrictEqual([
       "ピカチュウの でんこうせっか！",
       "マニューラは 24 ダメージ受けた！",
@@ -176,10 +175,12 @@ describe("battle", () => {
       playerA: { type: "fight", index: 0 },
       playerB: { type: "fight", index: 0 },
     });
+    progress = passTurn(progress);
     progress = runAction(progress, {
       playerA: { type: "fight", index: 0 },
       playerB: { type: "fight", index: 0 },
     });
+    progress = passTurn(progress);
     expect(currentPokemon(progress.playerB).status.hp).toBe(0);
     expect(currentPokemon(progress.playerA).status.hp).not.toBe(0);
     expect(progress.log.map(toString)).toStrictEqual([
@@ -232,6 +233,7 @@ describe("battle", () => {
       playerA: { type: "fight", index: 0 },
       playerB: { type: "fight", index: 0 },
     });
+    progress = passTurn(progress);
     expect(progress.log.map(toString)).toStrictEqual([
       "リザードンの かえんしょうしゃ！",
       "カメックスは 31 ダメージ受けた！",
@@ -283,7 +285,6 @@ describe("battle", () => {
       "マニューラは 24 ダメージ受けた！",
       "マニューラは たおれた！",
       "shigeruとの 勝負に 勝った！",
-      "",
     ]);
     progress = runAction(beginning, {
       playerA: { type: "fight", index: 0 },
@@ -294,7 +295,6 @@ describe("battle", () => {
       "ピカチュウは 78 ダメージ受けた！",
       "ピカチュウは たおれた！",
       "shigeruとの 勝負に 敗れた！",
-      "",
     ]);
   });
 
@@ -315,14 +315,17 @@ describe("battle", () => {
       playerA: { type: "change", index: 1 },
       playerB: { type: "fight", index: 0 },
     });
+    progress = passTurn(progress);
     progress = runAction(progress, {
       playerA: { type: "change", index: 0 },
       playerB: { type: "change", index: 1 },
     });
+    progress = passTurn(progress);
     progress = runAction(progress, {
       playerA: { type: "fight", index: 0 },
       playerB: { type: "change", index: 0 },
     });
+    progress = passTurn(progress);
     expect(progress.log.map(toString)).toStrictEqual([
       "satoshiは カメックスを引っ込めて ピカチュウを繰り出した！",
       "マニューラの あくのはどう！",
@@ -364,6 +367,7 @@ describe("battle", () => {
       playerA: { type: "fight", index: 0 },
       playerB: { type: "fight", index: 2 },
     });
+    progress = passTurn(progress);
     progress = runPrepare(progress, {
       playerA: { index: 1 },
     });
@@ -395,6 +399,7 @@ describe("battle", () => {
       playerA: { type: "fight", index: 2 },
       playerB: { type: "fight", index: 3 },
     });
+    progress = passTurn(progress);
     progress = runAction(progress, {
       playerA: { type: "fight", index: 2 },
       playerB: { type: "fight", index: 2 },
@@ -410,7 +415,6 @@ describe("battle", () => {
       "カメックスの 攻撃が 下がった",
       "カメックスの てっぺき！",
       "カメックスの 防御が ぐーんと上がった",
-      "",
     ]);
     expect(currentPokemon(progress.playerA).status.defence).toBe(4);
     expect(currentPokemon(progress.playerA).status.attack).toBe(-1);
@@ -436,6 +440,7 @@ describe("battle", () => {
       playerA: { type: "fight", index: 1 },
       playerB: { type: "fight", index: 1 },
     });
+    progress = passTurn(progress);
     expect(currentPokemon(progress.playerA).status.hp).toBe(156);
     progress = runAction(progress, {
       playerA: { type: "fight", index: 0 },
@@ -452,7 +457,6 @@ describe("battle", () => {
       "フシギバナは 92 ダメージ受けた！",
       "フシギバナの タネばくだん！",
       "マニューラは 58 ダメージ受けた！",
-      "",
     ]);
   });
 
@@ -473,6 +477,7 @@ describe("battle", () => {
       playerA: { type: "fight", index: 2 },
       playerB: { type: "fight", index: 1 },
     });
+    progress = passTurn(progress);
     progress = runAction(progress, {
       playerA: { type: "fight", index: 2 },
       playerB: { type: "fight", index: 0 },
@@ -487,7 +492,6 @@ describe("battle", () => {
       "ソルロックは 92 ダメージ受けた！",
       "ソルロックの さいみんじゅつ！",
       "フシギバナは 眠ってしまった！",
-      "",
     ]);
     expect(currentPokemon(progress.playerB).condition.ailment).toBe("sleep");
   });

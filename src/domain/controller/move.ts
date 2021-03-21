@@ -36,7 +36,7 @@ export const sortedMoves = (
     index: number
   ): MoveElement[] => {
     const pokemon = currentPokemon(player);
-    const move = pokemon.moves[index].move;
+    const move = pokemon.moves[index];
 
     // for random iff some are same speed and priority
     const speed =

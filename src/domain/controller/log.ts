@@ -4,6 +4,7 @@ import { Log, toString } from "@/domain/model/log";
 import { Player } from "@/domain/model/player";
 import { Pokemon } from "@/domain/model/pokemon";
 import { Ailment, Status } from "@/domain/model/stats";
+import { Move } from "@/domain/model/move";
 
 let config = defaultConfig;
 
@@ -13,10 +14,10 @@ export const apply = ({ log }: { log: Config }) => {
 
 const getConfig = () => config;
 
-export const action = (pokemon: Pokemon, moveIndex: number): Log => ({
+export const action = (pokemon: Pokemon, move: Move): Log => ({
   label: "action",
   name: pokemon.name,
-  move: pokemon.moves[moveIndex].move.name,
+  move: move.name,
 });
 
 export const damage = (pokemon: Pokemon, damage: number): Log => ({

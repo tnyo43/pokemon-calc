@@ -4,8 +4,9 @@ import { Player } from "@/domain/model/player";
 import { display as displayPlayer } from "@/domain/controller/player";
 import * as Action from "@/playground/command/action";
 import * as Prepare from "@/playground/command/prepare";
-import { runAction, runPrepare } from "@/domain/controller/battle";
+import { passTurn, runPrepare } from "@/domain/controller/battle/turn";
 import { needToChange } from "@/domain/controller/player";
+import { runAction } from "@/domain/controller/battle/action";
 
 export const run = async (
   playerA: Player,
@@ -27,6 +28,8 @@ export const run = async (
     const commandB = await Action.ask(progress.playerB);
     progress = runAction(progress, { playerA: commandA, playerB: commandB });
     if (progress.winner) break;
+
+    progress = passTurn(progress);
 
     let pCommand: PrepareCommandSet = {};
     if (needToChange(progress.playerA))

@@ -12,7 +12,7 @@ export const damage = (
   defencer: Pokemon,
   env?: Environment
 ) => {
-  const move = attacker.moves[index].move;
+  const move = attacker.moves[index];
   return move.moveType === "helping"
     ? 0
     : damageSub(move, attacker, defencer, env);
