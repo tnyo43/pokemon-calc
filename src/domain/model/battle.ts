@@ -23,3 +23,5 @@ export type Progress = {
   log: Log[];
   winner?: "playerA" | "playerB";
 };
+
+export type PlayerKey = "playerA" | "playerB";

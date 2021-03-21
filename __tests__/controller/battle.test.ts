@@ -1,4 +1,5 @@
-import { apply, runAction, runPrepare } from "@/domain/controller/battle";
+import { runAction, runPrepare } from "@/domain/controller/battle";
+import { apply } from "@/domain/controller/move";
 import { currentPokemon } from "@/domain/controller/player";
 import { ActionCommandSet, Progress } from "@/domain/model/battle";
 import { toString } from "@/domain/model/log";
@@ -20,7 +21,7 @@ import {
 
 describe("battle", () => {
   beforeAll(() => {
-    apply({ battle: { accuracy: "always" } });
+    apply({ battle: { hit: "always" } });
   });
 
   test("天候なし、通常の攻撃のやりとり", () => {

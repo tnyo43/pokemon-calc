@@ -1,5 +1,6 @@
 import {
   ActionCommandSet,
+  PlayerKey,
   PrepareCommandSet,
   Progress,
 } from "@/domain/model/battle";
@@ -11,46 +12,19 @@ import {
   speed as getSpeed,
   updateStatus,
 } from "@/domain/controller/pokemon";
-import { next, damage as weatherDamage } from "@/domain/controller/environment";
 import {
-  add,
-  actionLog,
-  changeLog,
-  damageLog,
-  koLog,
-  prepareLog,
-  resultLog,
-  statusLog,
-  turnendLog,
-  weatherDamageLog,
-  weatherLog,
-  protectLog,
-  protectSucceedLog,
-  missLog,
-  ailmentLog,
-} from "@/domain/controller/log";
+  updateEnvironment,
+  damage as weatherDamage,
+} from "@/domain/controller/environment";
+import * as Log from "@/domain/controller/log";
 import {
   updatePokemon,
   currentPokemon,
   lose,
   needToChange,
 } from "@/domain/controller/player";
-import { Player } from "@/domain/model/player";
-import { AttackMove, HelpingMove, Move } from "@/domain/model/move";
-import { Config, defaultConfig } from "@/domain/config/battle";
-import { probability } from "@/utils/random";
-
-let config = defaultConfig;
-
-export const apply = ({ battle }: { battle: Config }) => {
-  config = battle;
-};
-
-const getConfig = () => config;
-
-type PlayerKey = "playerA" | "playerB";
-
-const playerKeys: PlayerKey[] = ["playerA", "playerB"];
+import { AttackMove, HelpingMove } from "@/domain/model/move";
+import { isHit, sortedMoves } from "@/domain/controller/move";
 
 const isAFaster = (progress: Progress): boolean => {
   const [pokemonA, pokemonB] = [
@@ -60,6 +34,9 @@ const isAFaster = (progress: Progress): boolean => {
   return getSpeed(pokemonA) - getSpeed(pokemonB) + Math.random() - 0.5 > 0;
 };
 
+const order = (progress: Progress): PlayerKey[] =>
+  isAFaster(progress) ? ["playerA", "playerB"] : ["playerB", "playerA"];
+
 const judge = (progress: Progress, playerKey: PlayerKey): Progress => {
   if (progress.winner) return progress;
 
@@ -67,11 +44,11 @@ const judge = (progress: Progress, playerKey: PlayerKey): Progress => {
   const pokemon = currentPokemon(player);
   if (pokemon.dying || pokemon.status.hp) return progress;
 
-  let log = add(progress.log, koLog(pokemon));
-  let winner: "playerA" | "playerB" | undefined = undefined;
+  let log = Log.add(progress.log, Log.ko(pokemon));
+  let winner: PlayerKey | undefined = undefined;
   const updatedPlayer = updatePokemon(player, { ...pokemon, dying: true });
   if (lose(updatedPlayer)) {
-    log = add(log, resultLog(playerKey !== "playerA", progress.playerB));
+    log = Log.add(log, Log.result(playerKey !== "playerA", progress.playerB));
     winner = playerKey === "playerA" ? "playerB" : "playerA";
   }
   return {
@@ -80,38 +57,6 @@ const judge = (progress: Progress, playerKey: PlayerKey): Progress => {
     log,
     winner,
   };
-};
-
-type MoveElement = { move: Move; isA: boolean; speed: number };
-
-const sortedMoves = (
-  progress: Progress,
-  command: ActionCommandSet
-): Omit<MoveElement, "speed">[] => {
-  const priorityRatio = 1000;
-
-  const addMove = (
-    moves: MoveElement[],
-    player: Player,
-    isA: boolean,
-    index: number
-  ): MoveElement[] => {
-    const pokemon = currentPokemon(player);
-    const move = pokemon.moves[index].move;
-    const speed =
-      (move.priority ? move.priority : 0) * priorityRatio +
-      getSpeed(pokemon) +
-      Math.random(); // for random iff some are same speed and priority
-    return moves.concat({ move, isA, speed });
-  };
-
-  let moves: MoveElement[] = [];
-  if (command.playerA.type === "fight")
-    moves = addMove(moves, progress.playerA, true, command.playerA.index);
-  if (command.playerB.type === "fight")
-    moves = addMove(moves, progress.playerB, false, command.playerB.index);
-
-  return moves.sort((m1, m2) => m2.speed - m1.speed);
 };
 
 const attack = (
@@ -135,12 +80,12 @@ const attack = (
   if (progress.winner || needToChange(attacker)) return progress;
 
   let log = progress.log;
-  log = add(log, actionLog(attackPokemon, moveIndex));
+  log = Log.add(log, Log.action(attackPokemon, moveIndex));
 
   if (defencePokemon.condition.protect) {
-    log = add(log, protectSucceedLog(defencePokemon));
+    log = Log.add(log, Log.protectSucceed(defencePokemon));
   } else if (!hit) {
-    log = add(log, missLog(defencePokemon));
+    log = Log.add(log, Log.miss(defencePokemon));
   } else {
     const damageResult = damage(
       move,
@@ -149,7 +94,7 @@ const attack = (
       environment
     );
     defencer = updatePokemon(defencer, beHurt(defencePokemon, damageResult));
-    log = add(log, damageLog(defencePokemon, damageResult));
+    log = Log.add(log, Log.damage(defencePokemon, damageResult));
   }
 
   attacker = updatePokemon(attacker, reducePP(attackPokemon, moveIndex, 1));
@@ -183,26 +128,26 @@ const helping = (
 
   let log = progress.log;
 
-  log = add(log, actionLog(currentPokemon(attacker), moveIndex));
+  log = Log.add(log, Log.action(currentPokemon(attacker), moveIndex));
   if (
     currentPokemon(defencer).condition.protect &&
     (move.statusDiff?.opponent || move.ailment)
   ) {
-    log = add(log, protectSucceedLog(currentPokemon(defencer)));
+    log = Log.add(log, Log.protectSucceed(currentPokemon(defencer)));
   } else if (!hit) {
-    log = add(log, missLog(currentPokemon(defencer)));
+    log = Log.add(log, Log.miss(currentPokemon(defencer)));
   } else {
     if (move.statusDiff?.own) {
-      log = add(
+      log = Log.add(
         log,
-        statusLog(
+        Log.status(
           currentPokemon(attacker),
           convertStatus(currentPokemon(attacker), move.statusDiff?.own)
         )
       );
     }
     if (move.protect) {
-      log = add(log, protectLog(currentPokemon(attacker)));
+      log = Log.add(log, Log.protect(currentPokemon(attacker)));
       attacker = updatePokemon(attacker, {
         ...currentPokemon(attacker),
         condition: {
@@ -212,16 +157,16 @@ const helping = (
       });
     }
     if (move.statusDiff?.opponent) {
-      log = add(
+      log = Log.add(
         log,
-        statusLog(
+        Log.status(
           currentPokemon(defencer),
           convertStatus(currentPokemon(defencer), move.statusDiff?.opponent)
         )
       );
     }
     if (move.ailment) {
-      log = add(log, ailmentLog(currentPokemon(defencer), move.ailment));
+      log = Log.add(log, Log.ailment(currentPokemon(defencer), move.ailment));
       defencer = updatePokemon(defencer, {
         ...currentPokemon(defencer),
         condition: {
@@ -252,19 +197,19 @@ const helping = (
   };
 };
 
-const updateEnvironment = (progress: Progress): Progress => {
+const passTurnEnvironment = (progress: Progress): Progress => {
   if (progress.winner) return progress;
   let progResult = progress;
 
   const { environment } = progResult;
 
-  const nextEnvironment = next(environment);
+  const nextEnvironment = updateEnvironment(environment);
   if (environment.weather !== "none") {
     progResult = {
       ...progResult,
-      log: add(
+      log: Log.add(
         progResult.log,
-        weatherLog(
+        Log.weather(
           environment.weather.value,
           nextEnvironment.weather === "none"
         )
@@ -281,7 +226,10 @@ const updateEnvironment = (progress: Progress): Progress => {
     let log = progress.log;
     if (!pokemon.dying && damage && nextEnvironment.weather !== "none") {
       pokemon = beHurt(pokemon, damage);
-      log = add(log, weatherDamageLog(nextEnvironment.weather.value, pokemon));
+      log = Log.add(
+        log,
+        Log.weatherDamage(nextEnvironment.weather.value, pokemon)
+      );
     }
     return {
       ...progress,
@@ -290,9 +238,7 @@ const updateEnvironment = (progress: Progress): Progress => {
     };
   };
 
-  const [first, second]: PlayerKey[] = isAFaster(progResult)
-    ? ["playerA", "playerB"]
-    : ["playerB", "playerA"];
+  const [first, second]: PlayerKey[] = order(progress);
   progResult = beHurtByWeather(progResult, first);
   progResult = judge(progResult, first);
   progResult = beHurtByWeather(progResult, second);
@@ -318,9 +264,7 @@ const passTurnCondition = (progress: Progress) => {
     }),
   });
 
-  const [first, second]: PlayerKey[] = isAFaster(progResult)
-    ? ["playerA", "playerB"]
-    : ["playerB", "playerA"];
+  const [first, second]: PlayerKey[] = order(progress);
   progResult = updateCondition(progResult, first);
   progResult = judge(progResult, first);
   progResult = updateCondition(progResult, second);
@@ -344,19 +288,18 @@ const changePokemon = (
         ...player,
         currentPokemon: nextPokemon,
       },
-      log: add(
+      log: Log.add(
         progress.log,
-        changeLog(player, player.currentPokemon, nextPokemon)
+        Log.change(player, player.currentPokemon, nextPokemon)
       ),
     };
   };
 
   let progResult = progress;
 
-  const playerKeys: PlayerKey[] = isAFaster(progress)
-    ? ["playerA", "playerB"]
-    : ["playerB", "playerA"];
-  playerKeys.forEach((player) => (progResult = change(progResult, player)));
+  order(progress).forEach(
+    (player) => (progResult = change(progResult, player))
+  );
 
   return progResult;
 };
@@ -372,22 +315,21 @@ export const runAction = (
 
   const moves = sortedMoves(progResult, command);
   moves.forEach(({ move, isA }) => {
-    const hit =
-      move.accuracy === 100 ||
-      getConfig().accuracy === "always" ||
-      (getConfig().accuracy === "normal" && probability(move.accuracy / 100));
-    progResult =
-      move.moveType === "helping"
-        ? helping(progResult, isA, move, command, hit)
-        : attack(progResult, isA, move, command, hit);
+    if (!progress.winner) {
+      const hit = isHit(move);
+      progResult =
+        move.moveType === "helping"
+          ? helping(progResult, isA, move, command, hit)
+          : attack(progResult, isA, move, command, hit);
+    }
   });
 
-  progResult = updateEnvironment(progResult);
+  progResult = passTurnEnvironment(progResult);
   progResult = passTurnCondition(progResult);
 
   return {
     ...progResult,
-    log: add(progResult.log, turnendLog()),
+    log: Log.add(progResult.log, Log.turnend()),
   };
 };
 
@@ -396,7 +338,7 @@ export const runPrepare = (
   command: PrepareCommandSet
 ): Progress => {
   let progResult = progress;
-  playerKeys.forEach((playerKey) => {
+  order(progress).forEach((playerKey) => {
     const index = command[playerKey]?.index;
     const player = progress[playerKey];
     if (index) {
@@ -406,11 +348,11 @@ export const runPrepare = (
           ...player,
           currentPokemon: index,
         },
-        log: add(progress.log, prepareLog(player, index)),
+        log: Log.add(progress.log, Log.prepare(player, index)),
       };
     }
   });
   if (command !== {})
-    progResult = { ...progResult, log: add(progResult.log, turnendLog()) };
+    progResult = { ...progResult, log: Log.add(progResult.log, Log.turnend()) };
   return progResult;
 };
