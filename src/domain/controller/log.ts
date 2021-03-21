@@ -3,6 +3,7 @@ import { Weather } from "@/domain/model/environment";
 import { Log, toString } from "@/domain/model/log";
 import { Player } from "@/domain/model/player";
 import { Pokemon } from "@/domain/model/pokemon";
+import { Ailment, Status } from "@/domain/model/stats";
 
 let config = defaultConfig;
 
@@ -12,10 +13,10 @@ export const apply = ({ log }: { log: Config }) => {
 
 const getConfig = () => config;
 
-export const attackLog = (pokemon: Pokemon, moveIndex: number): Log => ({
-  label: "attack",
+export const actionLog = (pokemon: Pokemon, moveIndex: number): Log => ({
+  label: "action",
   name: pokemon.name,
-  move: pokemon.moves[moveIndex].name,
+  move: pokemon.moves[moveIndex].move.name,
 });
 
 export const damageLog = (pokemon: Pokemon, damage: number): Log => ({
@@ -23,6 +24,35 @@ export const damageLog = (pokemon: Pokemon, damage: number): Log => ({
   name: pokemon.name,
   damage,
 });
+
+export const protectLog = (pokemon: Pokemon): Log => ({
+  label: "protect",
+  name: pokemon.name,
+});
+
+export const protectSucceedLog = (pokemon: Pokemon): Log => ({
+  label: "protect succeed",
+  name: pokemon.name,
+});
+
+export const ailmentLog = (pokemon: Pokemon, ailment: Ailment): Log => ({
+  label: "ailment",
+  name: pokemon.name,
+  ailment,
+});
+
+export const missLog = (pokemon: Pokemon): Log => ({
+  label: "miss",
+  name: pokemon.name,
+});
+
+export const statusLog = (pokemon: Pokemon, status: Partial<Status>): Log[] =>
+  (Object.entries(status) as [keyof Status, number][]).map(([param, diff]) => ({
+    label: "status",
+    name: pokemon.name,
+    param,
+    diff,
+  }));
 
 export const changeLog = (
   player: Player,
@@ -66,7 +96,8 @@ export const resultLog = (win: boolean, opponent: Player): Log => ({
 
 export const turnendLog = (): Log => ({ label: "turnend" });
 
-export const add = (logs: Log[], log: Log) => {
-  if (getConfig().debug) console.log(toString(log));
+export const add = (logs: Log[], log: Log | Log[]) => {
+  log = [log].flat();
+  if (getConfig().debug) log.forEach((l) => console.log(toString(l)));
   return logs.concat(log);
 };

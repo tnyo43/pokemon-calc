@@ -4,7 +4,6 @@ import {
   next,
   damage as weatherDamage,
 } from "@/domain/controller/environment";
-import { damage } from "@/domain/controller/pokemon";
 import {
   grassy,
   hail,
@@ -21,6 +20,7 @@ import {
   rizadon,
   solrock,
   weavile,
+  damage,
 } from "__tests__/mock/pokemon";
 
 describe("environment", () => {

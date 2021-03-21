@@ -68,7 +68,7 @@ export const quickAttack: Move = {
   accuracy: 100,
   moveType: "physical",
   contact: true,
-  proprity: 1,
+  priority: 1,
 };
 
 export const ancientPower: Move = {
@@ -129,7 +129,7 @@ export const iceShard: Move = {
   accuracy: 100,
   moveType: "physical",
   contact: false,
-  proprity: 1,
+  priority: 1,
 };
 
 export const darkPulse: Move = {

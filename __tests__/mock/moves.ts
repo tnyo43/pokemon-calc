@@ -68,7 +68,7 @@ export const quickAttack: Move = {
   accuracy: 100,
   moveType: "physical",
   contact: true,
-  proprity: 1,
+  priority: 1,
 };
 
 export const ancientPower: Move = {
@@ -129,7 +129,7 @@ export const iceShard: Move = {
   accuracy: 100,
   moveType: "physical",
   contact: false,
-  proprity: 1,
+  priority: 1,
 };
 
 export const darkPulse: Move = {
@@ -140,4 +140,56 @@ export const darkPulse: Move = {
   accuracy: 100,
   moveType: "special",
   contact: false,
+};
+
+export const growl: Move = {
+  name: "なきごえ",
+  type: "normal",
+  pp: 40,
+  moveType: "helping",
+  accuracy: 100,
+  statusDiff: {
+    opponent: { attack: -1 },
+  },
+};
+
+export const ironDefence: Move = {
+  name: "てっぺき",
+  type: "steel",
+  pp: 15,
+  moveType: "helping",
+  accuracy: 100,
+  statusDiff: {
+    own: { defence: 2 },
+  },
+};
+
+export const bellyDrum: Move = {
+  name: "はらだいこ",
+  type: "normal",
+  pp: 10,
+  moveType: "helping",
+  accuracy: 100,
+  statusDiff: {
+    own: { attack: 12, hpRate: -0.5 },
+  },
+};
+
+export const protect: Move = {
+  name: "まもる",
+  type: "normal",
+  pp: 10,
+  moveType: "helping",
+  accuracy: 100,
+  priority: 4,
+  protect: true,
+};
+
+export const hypnosis: Move = {
+  name: "さいみんじゅつ",
+  type: "normal",
+  pp: 20,
+  moveType: "helping",
+  accuracy: 60,
+  ailment: "sleep",
 };

@@ -1,5 +1,5 @@
 import { Characteristic } from "@/domain/model/characteristic";
-import { Move } from "@/domain/model/move";
+import { AttackMove, BuffStatus, Move } from "@/domain/model/move";
 import { PokedexInfo, Pokemon } from "@/domain/model/pokemon";
 import { Statistics, StatisticsType, Status } from "@/domain/model/stats";
 import { Type } from "@/domain/model/type";
@@ -111,7 +111,7 @@ const specialDefenceWithEnv = (
   return Math.floor(coeff * specialDefence(pokemon));
 };
 
-const power = (move: Move, environment?: Environment) => {
+const power = (move: AttackMove, environment?: Environment) => {
   const powerCoeficient = !environment
     ? 1
     : (move.type === "electric" && isTerrainActive(environment, "electric")) ||
@@ -141,13 +141,11 @@ const typeCoefficient = (pokemon: Pokemon, move: Move) =>
   hasType(pokemon, move.type) ? 1.5 : 1;
 
 export const damage = (
-  index: number,
+  move: AttackMove,
   attacker: Pokemon,
   defencer: Pokemon,
   environment?: Environment
 ) => {
-  const move = attacker.moves[index];
-  if (move.moveType === "helping") return 0;
   const [attackFuncion, defenceFunction] =
     move.moveType === "physical"
       ? [attack, defenceWithEnv]
@@ -169,12 +167,24 @@ export const damage = (
   );
 };
 
+export const convertStatus = (
+  pokemon: Pokemon,
+  status: Partial<BuffStatus>
+): Partial<Status> => {
+  if (status.hpRate) {
+    status.hp = Math.floor(pokemon.basicValue.hp * status.hpRate);
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { hpRate, ...result } = status;
+  return result;
+};
+
 export const updateStatus = (
   pokemon: Pokemon,
-  diffStatus: Partial<Omit<Status, "pp">>
+  diffStatus: Partial<Status>
 ): Pokemon => {
-  const nextStatus = (Object.entries(diffStatus) as [
-    keyof Omit<Status, "pp">,
+  const status = (Object.entries(diffStatus) as [
+    keyof Status,
     number
   ][]).reduce((accStatus, [key, diff]) => {
     const [max, min] = key === "hp" ? [pokemon.basicValue.hp, 0] : [6, -6];
@@ -186,9 +196,10 @@ export const updateStatus = (
       ),
     };
   }, pokemon.status);
+
   return {
     ...pokemon,
-    status: nextStatus,
+    status,
   };
 };
 
@@ -198,16 +209,14 @@ export const reducePP = (
   count: number
 ): Pokemon => ({
   ...pokemon,
-  status: {
-    ...pokemon.status,
-    pp: pokemon.status.pp.map((p, i) =>
-      i === index ? Math.max(0, p - count) : p
-    ),
-  },
+  moves: pokemon.moves.map(({ move, pp }, i) => ({
+    move,
+    pp: i === index ? Math.max(0, pp - count) : pp,
+  })),
 });
 
 export const canMove = (pokemon: Pokemon, index: number) =>
-  pokemon.status.pp[index] > 0;
+  pokemon.moves[index].pp > 0;
 
 export const beHurt = (pokemon: Pokemon, damage: number) =>
   updateStatus(pokemon, { hp: -damage });
@@ -236,7 +245,6 @@ export const pokemon = (
     speed: 0,
     evasion: 0,
     accuracy: 0,
-    pp: moves.map((m) => m.pp),
   };
   const params = {
     baseStats: pokeInfo.baseStats,
@@ -251,7 +259,7 @@ export const pokemon = (
     ...pokeInfo,
     status: status,
     level,
-    moves,
+    moves: moves.map((move) => ({ move, pp: move.pp })),
     ability: pokeInfo.abilities[abilityIndex],
     effortValue,
     individualValue,
@@ -264,6 +272,7 @@ export const pokemon = (
       specialDefence: specialDefence(params),
       speed: speed(params),
     },
+    condition: {},
     dying: false,
   };
 };

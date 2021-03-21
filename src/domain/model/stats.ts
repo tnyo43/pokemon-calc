@@ -6,7 +6,7 @@ export type StatisticsType =
   | "specialDefence"
   | "speed";
 
-type StatusType = StatisticsType | "evasion" | "accuracy";
+export type StatusType = StatisticsType | "evasion" | "accuracy";
 
 export type Statistics = {
   [key in StatisticsType]: number;
@@ -14,6 +14,55 @@ export type Statistics = {
 
 export type Status = {
   [key in StatusType]: number;
-} & {
-  pp: number[];
+};
+
+export type Ailment =
+  | "burn"
+  | "freeze"
+  | "paralysis"
+  | "poison"
+  | "bad poison"
+  | "sleep";
+
+export type Condition = {
+  protect?: boolean;
+  ailment?: Ailment;
+};
+
+export const toString = (status: StatusType) => {
+  switch (status) {
+    case "hp":
+      return "体力";
+    case "attack":
+      return "攻撃";
+    case "defence":
+      return "防御";
+    case "specialAttack":
+      return "特攻";
+    case "specialDefence":
+      return "特防";
+    case "speed":
+      return "素早さ";
+    case "evasion":
+      return "回避率";
+    case "accuracy":
+      return "命中";
+  }
+};
+
+export const toStringAilment = (ailment: Ailment) => {
+  switch (ailment) {
+    case "burn":
+      return "やけど";
+    case "freeze":
+      return "こおり";
+    case "paralysis":
+      return "まひ";
+    case "poison":
+      return "どく";
+    case "bad poison":
+      return "もうどく";
+    case "sleep":
+      return "ねむり";
+  }
 };

@@ -1,9 +1,19 @@
 import { Weather } from "@/domain/model/environment";
 import { Player } from "@/domain/model/player";
+import {
+  Ailment,
+  StatusType,
+  toString as toStringStatusParam,
+} from "@/domain/model/stats";
 
 export type Log =
-  | { label: "attack"; name: string; move: string }
+  | { label: "action"; name: string; move: string }
   | { label: "damage"; name: string; damage: number }
+  | { label: "protect"; name: string }
+  | { label: "protect succeed"; name: string }
+  | { label: "ailment"; name: string; ailment: Ailment }
+  | { label: "miss"; name: string }
+  | { label: "status"; name: string; param: StatusType; diff: number }
   | { label: "change"; player: string; pokemonFrom: string; pokemonTo: string }
   | { label: "weather"; weather: Weather; isEnd: boolean }
   | { label: "weather damage"; weather: Weather; name: string }
@@ -12,11 +22,66 @@ export type Log =
   | { label: "result"; win: boolean; opponent: Player }
   | { label: "turnend" };
 
-const toStringAttack = ({ name, move }: { name: string; move: string }) =>
+const toStringAction = ({ name, move }: { name: string; move: string }) =>
   `${name}の ${move}！`;
 
 const toStringDamage = ({ name, damage }: { name: string; damage: number }) =>
   `${name}は ${damage} ダメージ受けた！`;
+
+const toStringProtect = ({ name }: { name: string }) =>
+  `${name}は 守りの 体勢に 入った！`;
+
+const toStringProtectSucceed = ({ name }: { name: string }) =>
+  `${name}は 攻撃から 身を守った！`;
+
+const toStringAilment = ({
+  name,
+  ailment,
+}: {
+  name: string;
+  ailment: Ailment;
+}) =>
+  `${name}は ${
+    ailment === "burn"
+      ? "やけどを 負った"
+      : ailment === "freeze"
+      ? "凍りついた"
+      : ailment === "paralysis"
+      ? "まひして 技が でにくくなった"
+      : ailment === "poison"
+      ? "毒を あびた"
+      : ailment === "bad poison"
+      ? "猛毒を あびた"
+      : "眠ってしまった"
+  }！`;
+
+const toStringMiss = ({ name }: { name: string }) =>
+  `${name}には 当たらなかった！`;
+
+const toStringStatus = ({
+  name,
+  param,
+  diff,
+}: {
+  name: string;
+  param: StatusType;
+  diff: number;
+}) =>
+  `${name}の ${toStringStatusParam(param)}が ${
+    diff === 12
+      ? "最大まで上がった"
+      : diff === 1
+      ? "上がった"
+      : diff === 2
+      ? "ぐーんと上がった"
+      : diff > 2
+      ? "ぐぐーんと上がった"
+      : diff === -1
+      ? "下がった"
+      : diff === -2
+      ? "がくっと下がった"
+      : "がくーんと下がった"
+  }`;
 
 const toStringChange = ({
   player,
@@ -81,10 +146,20 @@ const toStringTurnEnd = (_: Log) => "";
 
 export const toString = (log: Log): string => {
   switch (log.label) {
-    case "attack":
-      return toStringAttack(log);
+    case "action":
+      return toStringAction(log);
     case "damage":
       return toStringDamage(log);
+    case "protect":
+      return toStringProtect(log);
+    case "protect succeed":
+      return toStringProtectSucceed(log);
+    case "ailment":
+      return toStringAilment(log);
+    case "miss":
+      return toStringMiss(log);
+    case "status":
+      return toStringStatus(log);
     case "change":
       return toStringChange(log);
     case "weather":

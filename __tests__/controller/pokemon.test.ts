@@ -2,12 +2,17 @@ import {
   attack,
   defence,
   specialAttack,
-  damage,
   updateStatus,
   canMove,
   reducePP,
 } from "@/domain/controller/pokemon";
-import { fushigibana, kamex, pikachu, rizadon } from "__tests__/mock/pokemon";
+import {
+  damage,
+  fushigibana,
+  kamex,
+  pikachu,
+  rizadon,
+} from "__tests__/mock/pokemon";
 import { Pokemon } from "@/domain/model/pokemon";
 
 describe("pokemon", () => {

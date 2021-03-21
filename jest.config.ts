@@ -8,6 +8,6 @@ const config: Config.InitialOptions = {
     "@/(.*)": "<rootDir>/src/$1",
     "__tests__/(.*)": "<rootDir>/__tests__/$1",
   },
-  testPathIgnorePatterns: ["__tests__/mock"],
+  testPathIgnorePatterns: ["__tests__/mock", "build"],
 };
 export default config;
