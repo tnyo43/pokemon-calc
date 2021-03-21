@@ -6,8 +6,10 @@ import {
 } from "@/domain/model/stats";
 
 export type Log =
-  | { label: "attack"; name: string; move: string }
+  | { label: "action"; name: string; move: string }
   | { label: "damage"; name: string; damage: number }
+  | { label: "protect"; name: string }
+  | { label: "protect succeed"; name: string }
   | { label: "status"; name: string; param: StatusType; diff: number }
   | { label: "change"; player: string; pokemonFrom: string; pokemonTo: string }
   | { label: "weather"; weather: Weather; isEnd: boolean }
@@ -17,11 +19,17 @@ export type Log =
   | { label: "result"; win: boolean; opponent: Player }
   | { label: "turnend" };
 
-const toStringAttack = ({ name, move }: { name: string; move: string }) =>
+const toStringAction = ({ name, move }: { name: string; move: string }) =>
   `${name}の ${move}！`;
 
 const toStringDamage = ({ name, damage }: { name: string; damage: number }) =>
   `${name}は ${damage} ダメージ受けた！`;
+
+const toStringProtect = ({ name }: { name: string }) =>
+  `${name}は 守りの 体勢に 入った！`;
+
+const toStringProtectSucceed = ({ name }: { name: string }) =>
+  `${name}は 攻撃から 身を守った！`;
 
 const toStringStatus = ({
   name,
@@ -111,10 +119,14 @@ const toStringTurnEnd = (_: Log) => "";
 
 export const toString = (log: Log): string => {
   switch (log.label) {
-    case "attack":
-      return toStringAttack(log);
+    case "action":
+      return toStringAction(log);
     case "damage":
       return toStringDamage(log);
+    case "protect":
+      return toStringProtect(log);
+    case "protect succeed":
+      return toStringProtectSucceed(log);
     case "status":
       return toStringStatus(log);
     case "change":

@@ -12,7 +12,7 @@ export const damage = (
   defencer: Pokemon,
   env?: Environment
 ) => {
-  const move = attacker.moves[index];
+  const move = attacker.moves[index].move;
   return move.moveType === "helping"
     ? 0
     : damageSub(move, attacker, defencer, env);
@@ -21,7 +21,7 @@ export const damage = (
 export const fushigibana: Pokemon = pokemon(
   Pokedex.fushigibana,
   50,
-  [Moves.seedBomb],
+  [Moves.seedBomb, Moves.protect],
   0,
   statistics(4, 0, 0, 252, 0, 252),
   statistics(31, 31, 31, 31, 31, 31),

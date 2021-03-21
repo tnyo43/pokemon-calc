@@ -13,10 +13,10 @@ export const apply = ({ log }: { log: Config }) => {
 
 const getConfig = () => config;
 
-export const attackLog = (pokemon: Pokemon, moveIndex: number): Log => ({
-  label: "attack",
+export const actionLog = (pokemon: Pokemon, moveIndex: number): Log => ({
+  label: "action",
   name: pokemon.name,
-  move: pokemon.moves[moveIndex].name,
+  move: pokemon.moves[moveIndex].move.name,
 });
 
 export const damageLog = (pokemon: Pokemon, damage: number): Log => ({
@@ -25,18 +25,23 @@ export const damageLog = (pokemon: Pokemon, damage: number): Log => ({
   damage,
 });
 
-export const statusLog = (
-  pokemon: Pokemon,
-  status: Partial<Omit<Status, "pp">>
-): Log[] =>
-  (Object.entries(status) as [keyof Omit<Status, "pp">, number][]).map(
-    ([param, diff]) => ({
-      label: "status",
-      name: pokemon.name,
-      param,
-      diff,
-    })
-  );
+export const protectLog = (pokemon: Pokemon): Log => ({
+  label: "protect",
+  name: pokemon.name,
+});
+
+export const protectSucceedLog = (pokemon: Pokemon): Log => ({
+  label: "protect succeed",
+  name: pokemon.name,
+});
+
+export const statusLog = (pokemon: Pokemon, status: Partial<Status>): Log[] =>
+  (Object.entries(status) as [keyof Status, number][]).map(([param, diff]) => ({
+    label: "status",
+    name: pokemon.name,
+    param,
+    diff,
+  }));
 
 export const changeLog = (
   player: Player,

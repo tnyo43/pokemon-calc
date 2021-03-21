@@ -68,7 +68,7 @@ export const quickAttack: Move = {
   accuracy: 100,
   moveType: "physical",
   contact: true,
-  proprity: 1,
+  priority: 1,
 };
 
 export const ancientPower: Move = {
@@ -129,7 +129,7 @@ export const iceShard: Move = {
   accuracy: 100,
   moveType: "physical",
   contact: false,
-  proprity: 1,
+  priority: 1,
 };
 
 export const darkPulse: Move = {
@@ -173,4 +173,14 @@ export const bellyDrum: Move = {
   statusDiff: {
     own: { attack: 12, hpRate: -0.5 },
   },
+};
+
+export const protect: Move = {
+  name: "まもる",
+  type: "normal",
+  pp: 10,
+  moveType: "helping",
+  accuracy: 100,
+  priority: 4,
+  protect: true,
 };

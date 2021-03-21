@@ -14,8 +14,10 @@ export type Statistics = {
 
 export type Status = {
   [key in StatusType]: number;
-} & {
-  pp: number[];
+};
+
+export type Condition = {
+  protect?: boolean;
 };
 
 export const toString = (status: StatusType) => {

@@ -9,7 +9,13 @@ import {
   sunlight,
 } from "__tests__/mock/environment";
 import { playerA, playerB } from "__tests__/mock/player";
-import { kamex, pikachu, rizadon, weavile } from "__tests__/mock/pokemon";
+import {
+  kamex,
+  pikachu,
+  rizadon,
+  weavile,
+  fushigibana,
+} from "__tests__/mock/pokemon";
 
 describe("battle", () => {
   test("天候なし、通常の攻撃のやりとり", () => {
@@ -404,5 +410,43 @@ describe("battle", () => {
     expect(currentPokemon(progress.playerA).status.attack).toBe(-1);
     expect(currentPokemon(progress.playerB).status.attack).toBe(6);
     expect(currentPokemon(progress.playerB).status.hp).toBe(76);
+  });
+
+  test("まもるを発動する", () => {
+    let progress: Progress = {
+      playerA: {
+        ...playerA,
+        pokemons: [fushigibana],
+      },
+      playerB: {
+        ...playerB,
+        pokemons: [weavile],
+      },
+      environment: normalEnv,
+      log: [],
+    };
+    expect(currentPokemon(progress.playerA).status.hp).toBe(156);
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 1 },
+      playerB: { type: "fight", index: 1 },
+    });
+    expect(currentPokemon(progress.playerA).status.hp).toBe(156);
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 0 },
+      playerB: { type: "fight", index: 1 },
+    });
+    expect(currentPokemon(progress.playerA).status.hp).toBe(64);
+    expect(progress.log.map(toString)).toStrictEqual([
+      "フシギバナの まもる！",
+      "フシギバナは 守りの 体勢に 入った！",
+      "マニューラの こおりのつぶて！",
+      "フシギバナは 攻撃から 身を守った！",
+      "",
+      "マニューラの こおりのつぶて！",
+      "フシギバナは 92 ダメージ受けた！",
+      "フシギバナの タネばくだん！",
+      "マニューラは 58 ダメージ受けた！",
+      "",
+    ]);
   });
 });

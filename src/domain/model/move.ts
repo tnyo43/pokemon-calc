@@ -12,7 +12,7 @@ export type AttackMove = {
   accuracy: number;
   moveType: AttackMoveType;
   contact: boolean;
-  proprity?: number;
+  priority?: number;
 };
 
 export type BuffStatus = Status & { hpRate: number };
@@ -23,11 +23,12 @@ export type HelpingMove = {
   pp: number;
   accuracy: number;
   moveType: "helping";
-  proprity?: number;
+  priority?: number;
   statusDiff?: {
     own?: Partial<BuffStatus>;
     opponent?: Partial<BuffStatus>;
   };
+  protect?: boolean;
 };
 
 export type Move = AttackMove | HelpingMove;
