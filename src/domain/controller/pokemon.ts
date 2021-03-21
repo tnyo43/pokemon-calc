@@ -1,12 +1,7 @@
 import { Characteristic } from "@/domain/model/characteristic";
 import { AttackMove, BuffStatus, Move } from "@/domain/model/move";
 import { PokedexInfo, Pokemon } from "@/domain/model/pokemon";
-import {
-  Condition,
-  Statistics,
-  StatisticsType,
-  Status,
-} from "@/domain/model/stats";
+import { Statistics, StatisticsType, Status } from "@/domain/model/stats";
 import { Type } from "@/domain/model/type";
 import { compatibility } from "@/domain/controller/type";
 import { Environment } from "@/domain/model/environment";
@@ -186,8 +181,7 @@ export const convertStatus = (
 
 export const updateStatus = (
   pokemon: Pokemon,
-  diffStatus: Partial<Status>,
-  diffConditon?: Partial<Condition>
+  diffStatus: Partial<Status>
 ): Pokemon => {
   const status = (Object.entries(diffStatus) as [
     keyof Status,
@@ -203,17 +197,9 @@ export const updateStatus = (
     };
   }, pokemon.status);
 
-  let condition = pokemon.condition;
-  if (diffConditon) {
-    condition = {
-      ...status,
-      protect: diffConditon.protect,
-    };
-  }
   return {
     ...pokemon,
     status,
-    condition,
   };
 };
 

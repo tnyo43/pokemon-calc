@@ -61,7 +61,7 @@ export const pikachu: Pokemon = pokemon(
 export const solrock: Pokemon = pokemon(
   Pokedex.solrock,
   50,
-  [Moves.ancientPower, Moves.confusion],
+  [Moves.ancientPower, Moves.confusion, Moves.hypnosis],
   0,
   statistics(12, 252, 28, 0, 4, 212),
   statistics(31, 31, 31, 31, 31, 31),

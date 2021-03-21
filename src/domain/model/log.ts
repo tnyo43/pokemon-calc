@@ -1,6 +1,7 @@
 import { Weather } from "@/domain/model/environment";
 import { Player } from "@/domain/model/player";
 import {
+  Ailment,
   StatusType,
   toString as toStringStatusParam,
 } from "@/domain/model/stats";
@@ -10,6 +11,8 @@ export type Log =
   | { label: "damage"; name: string; damage: number }
   | { label: "protect"; name: string }
   | { label: "protect succeed"; name: string }
+  | { label: "ailment"; name: string; ailment: Ailment }
+  | { label: "miss"; name: string }
   | { label: "status"; name: string; param: StatusType; diff: number }
   | { label: "change"; player: string; pokemonFrom: string; pokemonTo: string }
   | { label: "weather"; weather: Weather; isEnd: boolean }
@@ -30,6 +33,30 @@ const toStringProtect = ({ name }: { name: string }) =>
 
 const toStringProtectSucceed = ({ name }: { name: string }) =>
   `${name}は 攻撃から 身を守った！`;
+
+const toStringAilment = ({
+  name,
+  ailment,
+}: {
+  name: string;
+  ailment: Ailment;
+}) =>
+  `${name}は ${
+    ailment === "burn"
+      ? "やけどを 負った"
+      : ailment === "freeze"
+      ? "凍りついた"
+      : ailment === "paralysis"
+      ? "まひして 技が でにくくなった"
+      : ailment === "poison"
+      ? "毒を あびた"
+      : ailment === "bad poison"
+      ? "猛毒を あびた"
+      : "眠ってしまった"
+  }！`;
+
+const toStringMiss = ({ name }: { name: string }) =>
+  `${name}には 当たらなかった！`;
 
 const toStringStatus = ({
   name,
@@ -127,6 +154,10 @@ export const toString = (log: Log): string => {
       return toStringProtect(log);
     case "protect succeed":
       return toStringProtectSucceed(log);
+    case "ailment":
+      return toStringAilment(log);
+    case "miss":
+      return toStringMiss(log);
     case "status":
       return toStringStatus(log);
     case "change":

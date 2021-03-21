@@ -16,8 +16,17 @@ export type Status = {
   [key in StatusType]: number;
 };
 
+export type Ailment =
+  | "burn"
+  | "freeze"
+  | "paralysis"
+  | "poison"
+  | "bad poison"
+  | "sleep";
+
 export type Condition = {
   protect?: boolean;
+  ailment?: Ailment;
 };
 
 export const toString = (status: StatusType) => {
@@ -38,5 +47,22 @@ export const toString = (status: StatusType) => {
       return "回避率";
     case "accuracy":
       return "命中";
+  }
+};
+
+export const toStringAilment = (ailment: Ailment) => {
+  switch (ailment) {
+    case "burn":
+      return "やけど";
+    case "freeze":
+      return "こおり";
+    case "paralysis":
+      return "まひ";
+    case "poison":
+      return "どく";
+    case "bad poison":
+      return "もうどく";
+    case "sleep":
+      return "ねむり";
   }
 };

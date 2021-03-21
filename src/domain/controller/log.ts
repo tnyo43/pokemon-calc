@@ -3,7 +3,7 @@ import { Weather } from "@/domain/model/environment";
 import { Log, toString } from "@/domain/model/log";
 import { Player } from "@/domain/model/player";
 import { Pokemon } from "@/domain/model/pokemon";
-import { Status } from "@/domain/model/stats";
+import { Ailment, Status } from "@/domain/model/stats";
 
 let config = defaultConfig;
 
@@ -32,6 +32,17 @@ export const protectLog = (pokemon: Pokemon): Log => ({
 
 export const protectSucceedLog = (pokemon: Pokemon): Log => ({
   label: "protect succeed",
+  name: pokemon.name,
+});
+
+export const ailmentLog = (pokemon: Pokemon, ailment: Ailment): Log => ({
+  label: "ailment",
+  name: pokemon.name,
+  ailment,
+});
+
+export const missLog = (pokemon: Pokemon): Log => ({
+  label: "miss",
   name: pokemon.name,
 });
 

@@ -26,6 +26,8 @@ import {
   weatherLog,
   protectLog,
   protectSucceedLog,
+  missLog,
+  ailmentLog,
 } from "@/domain/controller/log";
 import {
   updatePokemon,
@@ -35,6 +37,16 @@ import {
 } from "@/domain/controller/player";
 import { Player } from "@/domain/model/player";
 import { AttackMove, HelpingMove, Move } from "@/domain/model/move";
+import { Config, defaultConfig } from "@/domain/config/battle";
+import { probability } from "@/utils/random";
+
+let config = defaultConfig;
+
+export const apply = ({ battle }: { battle: Config }) => {
+  config = battle;
+};
+
+const getConfig = () => config;
 
 type PlayerKey = "playerA" | "playerB";
 
@@ -106,7 +118,8 @@ const attack = (
   progress: Progress,
   isA: boolean,
   move: AttackMove,
-  command: ActionCommandSet
+  command: ActionCommandSet,
+  hit: boolean
 ): Progress => {
   const [attackerKey, defencerKey]: PlayerKey[] = isA
     ? ["playerA", "playerB"]
@@ -126,6 +139,8 @@ const attack = (
 
   if (defencePokemon.condition.protect) {
     log = add(log, protectSucceedLog(defencePokemon));
+  } else if (!hit) {
+    log = add(log, missLog(defencePokemon));
   } else {
     const damageResult = damage(
       move,
@@ -155,47 +170,67 @@ const helping = (
   progress: Progress,
   isA: boolean,
   move: HelpingMove,
-  command: ActionCommandSet
+  command: ActionCommandSet,
+  hit: boolean
 ) => {
   const [attackerKey, defencerKey]: PlayerKey[] = isA
     ? ["playerA", "playerB"]
     : ["playerB", "playerA"];
   const moveIndex = command[attackerKey].index;
-  let attacker = progress[attackerKey];
-  const defencer = progress[defencerKey];
+  let [attacker, defencer] = [progress[attackerKey], progress[defencerKey]];
 
   if (progress.winner || needToChange(attacker)) return progress;
 
   let log = progress.log;
 
   log = add(log, actionLog(currentPokemon(attacker), moveIndex));
-  if (move.statusDiff?.own) {
-    log = add(
-      log,
-      statusLog(
-        currentPokemon(attacker),
-        convertStatus(currentPokemon(attacker), move.statusDiff?.own)
-      )
-    );
+  if (
+    currentPokemon(defencer).condition.protect &&
+    (move.statusDiff?.opponent || move.ailment)
+  ) {
+    log = add(log, protectSucceedLog(currentPokemon(defencer)));
+  } else if (!hit) {
+    log = add(log, missLog(currentPokemon(defencer)));
+  } else {
+    if (move.statusDiff?.own) {
+      log = add(
+        log,
+        statusLog(
+          currentPokemon(attacker),
+          convertStatus(currentPokemon(attacker), move.statusDiff?.own)
+        )
+      );
+    }
+    if (move.protect) {
+      log = add(log, protectLog(currentPokemon(attacker)));
+      attacker = updatePokemon(attacker, {
+        ...currentPokemon(attacker),
+        condition: {
+          ...currentPokemon(attacker).condition,
+          protect: true,
+        },
+      });
+    }
+    if (move.statusDiff?.opponent) {
+      log = add(
+        log,
+        statusLog(
+          currentPokemon(defencer),
+          convertStatus(currentPokemon(defencer), move.statusDiff?.opponent)
+        )
+      );
+    }
+    if (move.ailment) {
+      log = add(log, ailmentLog(currentPokemon(defencer), move.ailment));
+      defencer = updatePokemon(defencer, {
+        ...currentPokemon(defencer),
+        condition: {
+          ...currentPokemon(defencer).condition,
+          ailment: move.ailment,
+        },
+      });
+    }
   }
-  if (move.protect) {
-    log = add(log, protectLog(currentPokemon(attacker)));
-    attacker = updatePokemon(attacker, {
-      ...currentPokemon(attacker),
-      condition: {
-        ...currentPokemon(attacker).condition,
-        protect: true,
-      },
-    });
-  }
-  if (move.statusDiff?.opponent)
-    log = add(
-      log,
-      statusLog(
-        currentPokemon(defencer),
-        convertStatus(currentPokemon(defencer), move.statusDiff?.opponent)
-      )
-    );
 
   return {
     ...progress,
@@ -276,7 +311,10 @@ const passTurnCondition = (progress: Progress) => {
     ...progress,
     [playerKey]: updatePokemon(progress[playerKey], {
       ...currentPokemon(progress[playerKey]),
-      condition: { protect: false },
+      condition: {
+        ...currentPokemon(progress[playerKey]).condition,
+        protect: false,
+      },
     }),
   });
 
@@ -334,10 +372,14 @@ export const runAction = (
 
   const moves = sortedMoves(progResult, command);
   moves.forEach(({ move, isA }) => {
+    const hit =
+      move.accuracy === 100 ||
+      getConfig().accuracy === "always" ||
+      (getConfig().accuracy === "normal" && probability(move.accuracy / 100));
     progResult =
       move.moveType === "helping"
-        ? helping(progResult, isA, move, command)
-        : attack(progResult, isA, move, command);
+        ? helping(progResult, isA, move, command, hit)
+        : attack(progResult, isA, move, command, hit);
   });
 
   progResult = updateEnvironment(progResult);

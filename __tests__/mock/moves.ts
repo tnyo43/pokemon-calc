@@ -184,3 +184,12 @@ export const protect: Move = {
   priority: 4,
   protect: true,
 };
+
+export const hypnosis: Move = {
+  name: "さいみんじゅつ",
+  type: "normal",
+  pp: 20,
+  moveType: "helping",
+  accuracy: 60,
+  ailment: "sleep",
+};

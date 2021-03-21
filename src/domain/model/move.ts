@@ -1,5 +1,5 @@
 import { Type } from "@/domain/model/type";
-import { Status } from "@/domain/model/stats";
+import { Ailment, Status } from "@/domain/model/stats";
 
 type AttackMoveType = "physical" | "special";
 export type MoveType = AttackMoveType | "helping";
@@ -29,6 +29,7 @@ export type HelpingMove = {
     opponent?: Partial<BuffStatus>;
   };
   protect?: boolean;
+  ailment?: Ailment;
 };
 
 export type Move = AttackMove | HelpingMove;

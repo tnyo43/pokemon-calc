@@ -1,4 +1,4 @@
-import { runAction, runPrepare } from "@/domain/controller/battle";
+import { apply, runAction, runPrepare } from "@/domain/controller/battle";
 import { currentPokemon } from "@/domain/controller/player";
 import { ActionCommandSet, Progress } from "@/domain/model/battle";
 import { toString } from "@/domain/model/log";
@@ -15,9 +15,14 @@ import {
   rizadon,
   weavile,
   fushigibana,
+  solrock,
 } from "__tests__/mock/pokemon";
 
 describe("battle", () => {
+  beforeAll(() => {
+    apply({ battle: { accuracy: "always" } });
+  });
+
   test("天候なし、通常の攻撃のやりとり", () => {
     const progress: Progress = {
       playerA: {
@@ -448,5 +453,41 @@ describe("battle", () => {
       "マニューラは 58 ダメージ受けた！",
       "",
     ]);
+  });
+
+  test("さいみんじゅつで眠る", () => {
+    let progress: Progress = {
+      playerA: {
+        ...playerA,
+        pokemons: [solrock],
+      },
+      playerB: {
+        ...playerB,
+        pokemons: [fushigibana],
+      },
+      environment: normalEnv,
+      log: [],
+    };
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 2 },
+      playerB: { type: "fight", index: 1 },
+    });
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 2 },
+      playerB: { type: "fight", index: 0 },
+    });
+    expect(progress.log.map(toString)).toStrictEqual([
+      "フシギバナの まもる！",
+      "フシギバナは 守りの 体勢に 入った！",
+      "ソルロックの さいみんじゅつ！",
+      "フシギバナは 攻撃から 身を守った！",
+      "",
+      "フシギバナの タネばくだん！",
+      "ソルロックは 92 ダメージ受けた！",
+      "ソルロックの さいみんじゅつ！",
+      "フシギバナは 眠ってしまった！",
+      "",
+    ]);
+    expect(currentPokemon(progress.playerB).condition.ailment).toBe("sleep");
   });
 });
