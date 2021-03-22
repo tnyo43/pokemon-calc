@@ -117,13 +117,16 @@ describe("battle/turn", () => {
     ]);
   });
 
-  test("どくになると継続的にダメージを受ける", () => {
+  test("やけどと毒になると継続的にダメージを受ける", () => {
     let progress: Progress = {
       playerA: {
         ...playerA,
         pokemons: [addAilment(pikachu, "poison")],
       },
-      playerB,
+      playerB: {
+        ...playerB,
+        pokemons: [addAilment(kamex, "burn")],
+      },
       environment: normalEnv,
       log: [],
     };
@@ -131,8 +134,12 @@ describe("battle/turn", () => {
     expect(currentPokemon(progress.playerA).status.hp).toBe(
       pikachu.basicValue.hp - Math.floor(pikachu.basicValue.hp / 8)
     );
+    expect(currentPokemon(progress.playerB).status.hp).toBe(
+      kamex.basicValue.hp - Math.floor(kamex.basicValue.hp / 16)
+    );
     expect(progress.log.map(toString)).toStrictEqual([
       "ピカチュウは 毒の ダメージを受けた！",
+      "カメックスは やけどの ダメージを受けた！",
       "",
     ]);
   });

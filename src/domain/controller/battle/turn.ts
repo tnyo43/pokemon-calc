@@ -89,10 +89,13 @@ const passTurnCondition = (progress: Progress) => {
               (Math.min(15, ailment.past) * pokemon.basicValue.hp) / 16
             )
           )
+        : ailment.label === "burn"
+        ? Math.max(1, Math.floor(pokemon.basicValue.hp / 16))
         : 0;
     if (
-      (ailment.label === "poison" || ailment.label === "bad poison") &&
-      damage
+      ailment.label === "poison" ||
+      ailment.label === "bad poison" ||
+      ailment.label === "burn"
     ) {
       log = Log.add(log, Log.ailmentDamage(pokemon, ailment.label));
     }

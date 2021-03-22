@@ -12,7 +12,11 @@ export type Log =
   | { label: "protect"; name: string }
   | { label: "protect succeed"; name: string }
   | { label: "ailment"; name: string; ailment: Ailment["label"] }
-  | { label: "ailment damage"; name: string; ailment: "poison" | "bad poison" }
+  | {
+      label: "ailment damage";
+      name: string;
+      ailment: "poison" | "bad poison" | "burn";
+    }
   | { label: "miss"; name: string }
   | { label: "cannotMove"; name: string; cause: "paralysis" }
   | { label: "status"; name: string; param: StatusType; diff: number }
@@ -59,10 +63,11 @@ const toStringAilment = ({
 
 const toStringAilmentDamage = ({
   name,
+  ailment,
 }: {
   name: string;
-  ailment: "poison" | "bad poison";
-}) => `${name}は 毒の ダメージを受けた！`;
+  ailment: "poison" | "bad poison" | "burn";
+}) => `${name}は ${ailment === "burn" ? "やけど" : "毒"}の ダメージを受けた！`;
 
 const toStringMiss = ({ name }: { name: string }) =>
   `${name}には 当たらなかった！`;

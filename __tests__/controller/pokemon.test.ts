@@ -6,6 +6,7 @@ import {
   updateStatus,
   canMove,
   reducePP,
+  addAilment,
 } from "@/domain/controller/pokemon";
 import {
   damage,
@@ -54,6 +55,12 @@ describe("pokemon", () => {
     });
     test("タイプ不一致", () => {
       expect(damage(2, pikachu, rizadon, normalEnv)).toBe(21);
+    });
+    test("やけどで物理ダメージ半減", () => {
+      expect(damage(2, pikachu, rizadon, normalEnv)).toBe(21);
+      expect(damage(2, addAilment(pikachu, "burn"), rizadon, normalEnv)).toBe(
+        10
+      );
     });
   });
 

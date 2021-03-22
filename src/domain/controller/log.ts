@@ -45,7 +45,7 @@ export const ailment = (pokemon: Pokemon, ailment: Ailment["label"]): Log => ({
 
 export const ailmentDamage = (
   pokemon: Pokemon,
-  ailment: "poison" | "bad poison"
+  ailment: "poison" | "bad poison" | "burn"
 ): Log => ({
   label: "ailment damage",
   name: pokemon.name,

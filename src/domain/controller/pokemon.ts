@@ -174,11 +174,17 @@ export const damage = (
           defenceFunction(defencer, environment)
       ) / 50
     ) + 2;
+  const burnCoeff =
+    move.moveType === "physical" && attacker.condition.ailment?.label === "burn"
+      ? 0.5
+      : 1;
   return Math.floor(
     Math.floor(
-      Math.floor(baseDamage * weatherCoefficient(move, environment)) *
-        typeCoefficient(attacker, move)
-    ) * compatibility(move.type, defencer.types)
+      Math.floor(
+        Math.floor(baseDamage * weatherCoefficient(move, environment)) *
+          typeCoefficient(attacker, move)
+      ) * compatibility(move.type, defencer.types)
+    ) * burnCoeff
   );
 };
 
