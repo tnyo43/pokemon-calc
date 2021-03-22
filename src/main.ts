@@ -3,7 +3,11 @@ import { player1, player2 } from "@/domain/data/player";
 import { apply } from "@/playground/config";
 
 const main = async () => {
-  apply({ log: { debug: true }, player: { debug: true, type: "all" } });
+  apply({
+    log: { debug: true },
+    player: { debug: true, type: "all" },
+    move: { hit: "probability" },
+  });
   await run(player1, player2, { weather: "none", terrain: "none" });
 };
 

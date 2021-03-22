@@ -13,13 +13,14 @@ export type PokedexInfo = {
 
 export type Pokemon = Omit<PokedexInfo, "abilities"> & {
   level: number;
-  moves: { move: Move; pp: number }[];
+  moves: Move[];
   ability: string;
   effortValue: Statistics;
   individualValue: Statistics;
   characteristic: Characteristic;
+  basicValue: Statistics;
   status: Status;
   condition: Condition;
-  basicValue: Statistics;
+  pp: number[];
   dying: boolean;
 };

@@ -209,14 +209,11 @@ export const reducePP = (
   count: number
 ): Pokemon => ({
   ...pokemon,
-  moves: pokemon.moves.map(({ move, pp }, i) => ({
-    move,
-    pp: i === index ? Math.max(0, pp - count) : pp,
-  })),
+  pp: pokemon.pp.map((pp, i) => (i === index ? Math.max(0, pp - count) : pp)),
 });
 
 export const canMove = (pokemon: Pokemon, index: number) =>
-  pokemon.moves[index].pp > 0;
+  pokemon.pp[index] > 0;
 
 export const beHurt = (pokemon: Pokemon, damage: number) =>
   updateStatus(pokemon, { hp: -damage });
@@ -259,7 +256,7 @@ export const pokemon = (
     ...pokeInfo,
     status: status,
     level,
-    moves: moves.map((move) => ({ move, pp: move.pp })),
+    moves: moves,
     ability: pokeInfo.abilities[abilityIndex],
     effortValue,
     individualValue,
@@ -273,6 +270,7 @@ export const pokemon = (
       speed: speed(params),
     },
     condition: {},
+    pp: moves.map((m) => m.pp),
     dying: false,
   };
 };

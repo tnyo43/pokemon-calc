@@ -11,7 +11,7 @@ import {
 export const playerA: Player = {
   name: "satoshi",
   currentPokemon: 0,
-  pokemons: [pikachu, rizadon, solrock],
+  pokemons: [rizadon, pikachu, solrock],
 };
 
 export const playerB: Player = {

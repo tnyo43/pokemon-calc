@@ -4,6 +4,7 @@ import { Log, toString } from "@/domain/model/log";
 import { Player } from "@/domain/model/player";
 import { Pokemon } from "@/domain/model/pokemon";
 import { Ailment, Status } from "@/domain/model/stats";
+import { Move } from "@/domain/model/move";
 
 let config = defaultConfig;
 
@@ -13,40 +14,40 @@ export const apply = ({ log }: { log: Config }) => {
 
 const getConfig = () => config;
 
-export const actionLog = (pokemon: Pokemon, moveIndex: number): Log => ({
+export const action = (pokemon: Pokemon, move: Move): Log => ({
   label: "action",
   name: pokemon.name,
-  move: pokemon.moves[moveIndex].move.name,
+  move: move.name,
 });
 
-export const damageLog = (pokemon: Pokemon, damage: number): Log => ({
+export const damage = (pokemon: Pokemon, damage: number): Log => ({
   label: "damage",
   name: pokemon.name,
   damage,
 });
 
-export const protectLog = (pokemon: Pokemon): Log => ({
+export const protect = (pokemon: Pokemon): Log => ({
   label: "protect",
   name: pokemon.name,
 });
 
-export const protectSucceedLog = (pokemon: Pokemon): Log => ({
+export const protectSucceed = (pokemon: Pokemon): Log => ({
   label: "protect succeed",
   name: pokemon.name,
 });
 
-export const ailmentLog = (pokemon: Pokemon, ailment: Ailment): Log => ({
+export const ailment = (pokemon: Pokemon, ailment: Ailment): Log => ({
   label: "ailment",
   name: pokemon.name,
   ailment,
 });
 
-export const missLog = (pokemon: Pokemon): Log => ({
+export const miss = (pokemon: Pokemon): Log => ({
   label: "miss",
   name: pokemon.name,
 });
 
-export const statusLog = (pokemon: Pokemon, status: Partial<Status>): Log[] =>
+export const status = (pokemon: Pokemon, status: Partial<Status>): Log[] =>
   (Object.entries(status) as [keyof Status, number][]).map(([param, diff]) => ({
     label: "status",
     name: pokemon.name,
@@ -54,7 +55,7 @@ export const statusLog = (pokemon: Pokemon, status: Partial<Status>): Log[] =>
     diff,
   }));
 
-export const changeLog = (
+export const change = (
   player: Player,
   changeFrom: number,
   changeTo: number
@@ -65,36 +66,36 @@ export const changeLog = (
   pokemonTo: player.pokemons[changeTo].name,
 });
 
-export const weatherLog = (weather: Weather, isEnd: boolean): Log => ({
+export const weather = (weather: Weather, isEnd: boolean): Log => ({
   label: "weather",
   weather,
   isEnd,
 });
 
-export const weatherDamageLog = (weather: Weather, pokemon: Pokemon): Log => ({
+export const weatherDamage = (weather: Weather, pokemon: Pokemon): Log => ({
   label: "weather damage",
   weather,
   name: pokemon.name,
 });
 
-export const koLog = (pokemon: Pokemon): Log => ({
+export const ko = (pokemon: Pokemon): Log => ({
   label: "ko",
   name: pokemon.name,
 });
 
-export const prepareLog = (player: Player, index: number): Log => ({
+export const prepare = (player: Player, index: number): Log => ({
   label: "prepare",
   name: player.name,
   pokemon: player.pokemons[index].name,
 });
 
-export const resultLog = (win: boolean, opponent: Player): Log => ({
+export const result = (win: boolean, opponent: Player): Log => ({
   label: "result",
   win,
   opponent,
 });
 
-export const turnendLog = (): Log => ({ label: "turnend" });
+export const turnend = (): Log => ({ label: "turnend" });
 
 export const add = (logs: Log[], log: Log | Log[]) => {
   log = [log].flat();

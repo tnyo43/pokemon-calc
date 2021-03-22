@@ -1,7 +1,7 @@
 import {
   overrideWeather,
   overrideTerrain,
-  next,
+  updateEnvironment,
   damage as weatherDamage,
 } from "@/domain/controller/environment";
 import {
@@ -37,19 +37,19 @@ describe("environment", () => {
     });
 
     test("ターンが経過して環境が更新される", () => {
-      expect(next(normalEnv)).toStrictEqual(normalEnv);
-      expect(next(rainElectric)).toStrictEqual({
+      expect(updateEnvironment(normalEnv)).toStrictEqual(normalEnv);
+      expect(updateEnvironment(rainElectric)).toStrictEqual({
         weather: { value: "rain", count: 4 },
         terrain: { value: "electric", count: 4 },
       });
       expect(
-        next({
+        updateEnvironment({
           weather: { value: "rain", count: 1 },
           terrain: { value: "electric", count: 1 },
         })
       ).toStrictEqual(normalEnv);
       expect(
-        next({
+        updateEnvironment({
           weather: { value: "hail", count: 3 },
           terrain: { value: "psychic", count: 1 },
         })

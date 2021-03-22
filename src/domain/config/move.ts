@@ -1,7 +1,7 @@
 export type Config = {
-  accuracy: "normal" | "always" | "none";
+  hit: "probability" | "always" | "none";
 };
 
 export const defaultConfig: Config = {
-  accuracy: "always",
+  hit: "always",
 };

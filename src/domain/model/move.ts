@@ -11,7 +11,7 @@ export type AttackMove = {
   pp: number;
   accuracy: number;
   moveType: AttackMoveType;
-  contact: boolean;
+  contact?: boolean;
   priority?: number;
 };
 
