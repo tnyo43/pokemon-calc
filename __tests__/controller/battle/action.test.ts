@@ -346,7 +346,7 @@ describe("battle/action", () => {
 
   test("状態異常になる", () => {
     randomSpy = jest.spyOn(mockRandom, "probability").mockReturnValue(true);
-    const progress: Progress = {
+    let progress: Progress = {
       playerA: {
         ...playerA,
         pokemons: [breloom],
@@ -391,6 +391,14 @@ describe("battle/action", () => {
       "コイキングは 猛毒を あびた！",
       "コイキングの はねる！",
     ]);
+
+    progress = {
+      ...progress,
+      playerA: {
+        ...playerA,
+        pokemons: [weavile],
+      },
+    };
   });
 
   test("まひすると技が失敗することがある", () => {
@@ -421,6 +429,38 @@ describe("battle/action", () => {
       "カメックスの なみのり！",
       "マニューラは 61 ダメージ受けた！",
       "マニューラは 体がしびれて 動けない！",
+    ]);
+  });
+
+  test("凍ると確率で溶けるまで動けない", () => {
+    let progress: Progress = {
+      playerA: {
+        ...playerA,
+        pokemons: [addAilment(fushigibana, "freeze")],
+      },
+      playerB,
+      environment: normalEnv,
+      log: [],
+    };
+    randomSpy = jest.spyOn(mockRandom, "probability").mockReturnValue(true);
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 0 },
+      playerB: { type: "fight", index: 0 },
+    });
+    randomSpy = jest.spyOn(mockRandom, "probability").mockReturnValue(false);
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 0 },
+      playerB: { type: "fight", index: 0 },
+    });
+    expect(progress.log.map(toString)).toStrictEqual([
+      "フシギバナは 凍ってしまって 動けない！",
+      "カメックスの なみのり！",
+      "フシギバナは 27 ダメージ受けた！",
+      "フシギバナの こおりが とけた！",
+      "フシギバナの タネばくだん！",
+      "カメックスは 84 ダメージ受けた！",
+      "カメックスの なみのり！",
+      "フシギバナは 27 ダメージ受けた！",
     ]);
   });
 });

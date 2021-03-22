@@ -36,6 +36,14 @@ export const addAilment = (pokemon: Pokemon, ailment?: Ailment["label"]) =>
 export const hasAilment = (pokemon: Pokemon, ailment?: Ailment["label"]) =>
   ailment ? pokemon.condition.ailment?.label === ailment : !!pokemon.condition;
 
+export const recoverAilment = (pokemon: Pokemon) => ({
+  ...pokemon,
+  condition: {
+    ...pokemon.condition,
+    ailment: undefined,
+  },
+});
+
 const characteristicCorrection = (
   characteristic: Characteristic,
   statusType: StatisticsType

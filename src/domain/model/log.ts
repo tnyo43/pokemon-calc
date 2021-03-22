@@ -18,7 +18,8 @@ export type Log =
       ailment: "poison" | "bad poison" | "burn";
     }
   | { label: "miss"; name: string }
-  | { label: "cannotMove"; name: string; cause: "paralysis" }
+  | { label: "cannotMove"; name: string; cause: "paralysis" | "freeze" }
+  | { label: "recover"; name: string; cause: "freeze" }
   | { label: "status"; name: string; param: StatusType; diff: number }
   | { label: "change"; player: string; pokemonFrom: string; pokemonTo: string }
   | { label: "weather"; weather: Weather; isEnd: boolean }
@@ -72,8 +73,23 @@ const toStringAilmentDamage = ({
 const toStringMiss = ({ name }: { name: string }) =>
   `${name}には 当たらなかった！`;
 
-const toStringCannotMove = ({ name }: { name: string; cause: "paralysis" }) =>
-  `${name}は 体がしびれて 動けない！`;
+const toStringCannotMove = ({
+  name,
+  cause,
+}: {
+  name: string;
+  cause: "paralysis" | "freeze";
+}) =>
+  `${name}は ${
+    cause === "paralysis" ? "体がしびれて" : "凍ってしまって"
+  } 動けない！`;
+
+const toStringRecover = ({
+  name,
+}: {
+  name: string;
+  cause: "paralysis" | "freeze";
+}) => `${name}の こおりが とけた！`;
 
 const toStringStatus = ({
   name,
@@ -179,6 +195,8 @@ export const toString = (log: Log): string => {
       return toStringMiss(log);
     case "cannotMove":
       return toStringCannotMove(log);
+    case "recover":
+      return toStringRecover(log);
     case "status":
       return toStringStatus(log);
     case "change":

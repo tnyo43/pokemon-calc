@@ -57,8 +57,17 @@ export const miss = (pokemon: Pokemon): Log => ({
   name: pokemon.name,
 });
 
-export const cannotMove = (pokemon: Pokemon, cause: "paralysis"): Log => ({
+export const cannotMove = (
+  pokemon: Pokemon,
+  cause: "paralysis" | "freeze"
+): Log => ({
   label: "cannotMove",
+  name: pokemon.name,
+  cause,
+});
+
+export const recover = (pokemon: Pokemon, cause: "freeze"): Log => ({
+  label: "recover",
   name: pokemon.name,
   cause,
 });

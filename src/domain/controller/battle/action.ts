@@ -14,6 +14,7 @@ import {
   convertStatus,
   damage,
   hasAilment,
+  recoverAilment,
   reducePP,
   updateStatus,
 } from "@/domain/controller/pokemon";
@@ -87,16 +88,16 @@ const attack = (
     log = Log.add(log, Log.damage(currentPokemon(defencer), damageResult));
   }
 
-  let progressResult = {
+  let progResult = {
     ...progress,
     log,
     [keys.attacker]: attacker,
     [keys.defencer]: defencer,
   };
 
-  progressResult = judge(progressResult, keys.defencer);
-  progressResult = judge(progressResult, keys.attacker);
-  return progressResult;
+  progResult = judge(progResult, keys.defencer);
+  progResult = judge(progResult, keys.attacker);
+  return progResult;
 };
 
 const helping = (
@@ -197,6 +198,27 @@ const action = (
         Log.cannotMove(currentPokemon(args.attacker), "paralysis")
       ),
     };
+  }
+
+  if (hasAilment(currentPokemon(args.attacker), "freeze")) {
+    if (probability(0.75)) {
+      return {
+        ...progress,
+        log: Log.add(
+          progress.log,
+          Log.cannotMove(currentPokemon(args.attacker), "freeze")
+        ),
+      };
+    } else {
+      args.attacker = updatePokemon(
+        args.attacker,
+        recoverAilment(currentPokemon(args.attacker))
+      );
+      progress.log = Log.add(
+        progress.log,
+        Log.recover(currentPokemon(args.attacker), "freeze")
+      );
+    }
   }
 
   args.attacker = updatePokemon(
