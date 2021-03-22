@@ -20,6 +20,7 @@ import {
 } from "@/domain/controller/pokemon";
 import { Player } from "@/domain/model/player";
 import { probability } from "@/utils/random";
+import { pastSleep } from "@/domain/controller/ailment";
 
 type Args = {
   attacker: Player;
@@ -198,9 +199,7 @@ const action = (
         Log.cannotMove(currentPokemon(args.attacker), "paralysis")
       ),
     };
-  }
-
-  if (hasAilment(currentPokemon(args.attacker), "freeze")) {
+  } else if (hasAilment(currentPokemon(args.attacker), "freeze")) {
     if (probability(0.75)) {
       return {
         ...progress,
@@ -217,6 +216,30 @@ const action = (
       progress.log = Log.add(
         progress.log,
         Log.recover(currentPokemon(args.attacker), "freeze")
+      );
+    }
+  } else if (hasAilment(currentPokemon(args.attacker), "sleep")) {
+    const pokemon = currentPokemon(args.attacker);
+    args.attacker = updatePokemon(args.attacker, {
+      ...pokemon,
+      condition: {
+        ...pokemon.condition,
+        ailment: pastSleep(pokemon.condition.ailment),
+      },
+    });
+    if (currentPokemon(args.attacker).condition.ailment?.label === "sleep") {
+      return {
+        ...progress,
+        [args.keys.attacker]: args.attacker,
+        log: Log.add(
+          progress.log,
+          Log.cannotMove(currentPokemon(args.attacker), "sleep")
+        ),
+      };
+    } else {
+      progress.log = Log.add(
+        progress.log,
+        Log.recover(currentPokemon(args.attacker), "sleep")
       );
     }
   }

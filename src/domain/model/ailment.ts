@@ -4,7 +4,7 @@ export type Ailment =
   | { label: "paralysis" }
   | { label: "poison" }
   | { label: "bad poison"; past: number }
-  | { label: "sleep" };
+  | { label: "sleep"; remaining: number };
 
 export const toStringAilment = (ailment: Ailment) => {
   switch (ailment.label) {

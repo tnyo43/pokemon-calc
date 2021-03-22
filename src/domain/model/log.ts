@@ -18,8 +18,12 @@ export type Log =
       ailment: "poison" | "bad poison" | "burn";
     }
   | { label: "miss"; name: string }
-  | { label: "cannotMove"; name: string; cause: "paralysis" | "freeze" }
-  | { label: "recover"; name: string; cause: "freeze" }
+  | {
+      label: "cannotMove";
+      name: string;
+      cause: "paralysis" | "freeze" | "sleep";
+    }
+  | { label: "recover"; name: string; cause: "freeze" | "sleep" }
   | { label: "status"; name: string; param: StatusType; diff: number }
   | { label: "change"; player: string; pokemonFrom: string; pokemonTo: string }
   | { label: "weather"; weather: Weather; isEnd: boolean }
@@ -78,18 +82,24 @@ const toStringCannotMove = ({
   cause,
 }: {
   name: string;
-  cause: "paralysis" | "freeze";
+  cause: "paralysis" | "freeze" | "sleep";
 }) =>
-  `${name}は ${
-    cause === "paralysis" ? "体がしびれて" : "凍ってしまって"
-  } 動けない！`;
+  cause === "sleep"
+    ? `${name}は ぐうぐうねむっている`
+    : `${name}は ${
+        cause === "paralysis" ? "体がしびれて" : "凍ってしまって"
+      } 動けない！`;
 
 const toStringRecover = ({
   name,
+  cause,
 }: {
   name: string;
-  cause: "paralysis" | "freeze";
-}) => `${name}の こおりが とけた！`;
+  cause: "freeze" | "sleep";
+}) =>
+  cause === "sleep"
+    ? `${name}は 目をさました！`
+    : `${name}の こおりが とけた！`;
 
 const toStringStatus = ({
   name,

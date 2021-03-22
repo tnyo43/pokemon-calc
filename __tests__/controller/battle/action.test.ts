@@ -21,20 +21,23 @@ import {
 import * as mockRandom from "@/utils/random";
 
 describe("battle/action", () => {
-  let randomSpy: jest.SpyInstance<boolean, [p: number]>;
+  let probabilitySpy: jest.SpyInstance<boolean, [p: number]>;
+  let rangeSpy: jest.SpyInstance<number, [p: number, q: number, r: number]>;
 
   beforeAll(() => {
     apply({ battle: { hit: "probability" } });
   });
 
   beforeEach(() => {
-    randomSpy = jest
+    probabilitySpy = jest
       .spyOn(mockRandom, "probability")
       .mockImplementation((_) => true);
+    rangeSpy = jest.spyOn(mockRandom, "range").mockImplementation(() => 3);
   });
 
   afterEach(() => {
-    randomSpy.mockClear();
+    probabilitySpy.mockClear();
+    rangeSpy.mockClear();
   });
 
   test("通常の攻撃のやりとり", () => {
@@ -140,12 +143,16 @@ describe("battle/action", () => {
       environment: normalEnv,
       log: [],
     };
-    randomSpy = jest.spyOn(mockRandom, "probability").mockReturnValue(false);
+    probabilitySpy = jest
+      .spyOn(mockRandom, "probability")
+      .mockReturnValue(false);
     progress = runAction(progress, {
       playerA: { type: "fight", index: 2 },
       playerB: { type: "fight", index: 0 },
     });
-    randomSpy = jest.spyOn(mockRandom, "probability").mockReturnValue(true);
+    probabilitySpy = jest
+      .spyOn(mockRandom, "probability")
+      .mockReturnValue(true);
     progress = runAction(progress, {
       playerA: { type: "fight", index: 2 },
       playerB: { type: "fight", index: 0 },
@@ -345,7 +352,9 @@ describe("battle/action", () => {
   });
 
   test("状態異常になる", () => {
-    randomSpy = jest.spyOn(mockRandom, "probability").mockReturnValue(true);
+    probabilitySpy = jest
+      .spyOn(mockRandom, "probability")
+      .mockReturnValue(true);
     let progress: Progress = {
       playerA: {
         ...playerA,
@@ -396,9 +405,23 @@ describe("battle/action", () => {
       ...progress,
       playerA: {
         ...playerA,
-        pokemons: [weavile],
+        pokemons: [solrock],
       },
     };
+
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 2 }, // さいみんじゅつ
+      playerB: { type: "fight", index: 0 },
+    });
+    expect(currentPokemon(progress.playerB).condition.ailment).toStrictEqual({
+      label: "sleep",
+      remaining: 2,
+    });
+    expect(progress.log.map(toString)).toStrictEqual([
+      "ソルロックの さいみんじゅつ！",
+      "コイキングは 眠ってしまった！",
+      "コイキングは ぐうぐうねむっている",
+    ]);
   });
 
   test("まひすると技が失敗することがある", () => {
@@ -411,12 +434,16 @@ describe("battle/action", () => {
       environment: normalEnv,
       log: [],
     };
-    randomSpy = jest.spyOn(mockRandom, "probability").mockReturnValue(false);
+    probabilitySpy = jest
+      .spyOn(mockRandom, "probability")
+      .mockReturnValue(false);
     progress = runAction(progress, {
       playerA: { type: "fight", index: 0 },
       playerB: { type: "fight", index: 0 },
     });
-    randomSpy = jest.spyOn(mockRandom, "probability").mockReturnValue(true);
+    probabilitySpy = jest
+      .spyOn(mockRandom, "probability")
+      .mockReturnValue(true);
     progress = runAction(progress, {
       playerA: { type: "fight", index: 2 },
       playerB: { type: "fight", index: 0 },
@@ -442,12 +469,16 @@ describe("battle/action", () => {
       environment: normalEnv,
       log: [],
     };
-    randomSpy = jest.spyOn(mockRandom, "probability").mockReturnValue(true);
+    probabilitySpy = jest
+      .spyOn(mockRandom, "probability")
+      .mockReturnValue(true);
     progress = runAction(progress, {
       playerA: { type: "fight", index: 0 },
       playerB: { type: "fight", index: 0 },
     });
-    randomSpy = jest.spyOn(mockRandom, "probability").mockReturnValue(false);
+    probabilitySpy = jest
+      .spyOn(mockRandom, "probability")
+      .mockReturnValue(false);
     progress = runAction(progress, {
       playerA: { type: "fight", index: 0 },
       playerB: { type: "fight", index: 0 },
@@ -461,6 +492,44 @@ describe("battle/action", () => {
       "カメックスは 84 ダメージ受けた！",
       "カメックスの なみのり！",
       "フシギバナは 27 ダメージ受けた！",
+    ]);
+  });
+
+  test("眠ると数ターン起きない", () => {
+    rangeSpy = jest.spyOn(mockRandom, "range").mockReturnValue(3);
+    let progress: Progress = {
+      playerA: {
+        ...playerA,
+        pokemons: [solrock, pikachu],
+      },
+      playerB: {
+        ...playerB,
+        pokemons: [magikarp],
+      },
+      environment: normalEnv,
+      log: [],
+    };
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 2 }, // さいみんじゅつ
+      playerB: { type: "fight", index: 0 },
+    });
+    progress = runAction(progress, {
+      playerA: { type: "change", index: 1 },
+      playerB: { type: "fight", index: 0 },
+    });
+    progress = runAction(progress, {
+      playerA: { type: "change", index: 0 },
+      playerB: { type: "fight", index: 0 },
+    });
+    expect(progress.log.map(toString)).toStrictEqual([
+      "ソルロックの さいみんじゅつ！",
+      "コイキングは 眠ってしまった！",
+      "コイキングは ぐうぐうねむっている",
+      "satoshiは ソルロックを引っ込めて ピカチュウを繰り出した！",
+      "コイキングは ぐうぐうねむっている",
+      "satoshiは ピカチュウを引っ込めて ソルロックを繰り出した！",
+      "コイキングは 目をさました！",
+      "コイキングの はねる！",
     ]);
   });
 });

@@ -59,14 +59,14 @@ export const miss = (pokemon: Pokemon): Log => ({
 
 export const cannotMove = (
   pokemon: Pokemon,
-  cause: "paralysis" | "freeze"
+  cause: "paralysis" | "freeze" | "sleep"
 ): Log => ({
   label: "cannotMove",
   name: pokemon.name,
   cause,
 });
 
-export const recover = (pokemon: Pokemon, cause: "freeze"): Log => ({
+export const recover = (pokemon: Pokemon, cause: "freeze" | "sleep"): Log => ({
   label: "recover",
   name: pokemon.name,
   cause,

@@ -14,6 +14,12 @@ export type AttackMove = {
   moveType: AttackMoveType;
   contact?: boolean;
   priority?: number;
+  additional?: {
+    ailment?: {
+      label: Ailment["label"];
+      probability: number;
+    };
+  };
 };
 
 export type BuffStatus = Status & { hpRate: number };
