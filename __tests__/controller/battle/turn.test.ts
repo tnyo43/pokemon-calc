@@ -6,9 +6,14 @@ import { Progress } from "@/domain/model/battle";
 import { toString } from "@/domain/model/log";
 import { hail, normalEnv, sandstormMisty } from "__tests__/mock/environment";
 import { playerA, playerB } from "__tests__/mock/player";
-import { kamex, pikachu, rizadon } from "__tests__/mock/pokemon";
+import {
+  damagedPokemon,
+  kamex,
+  pikachu,
+  rizadon,
+} from "__tests__/mock/pokemon";
 
-describe("battle", () => {
+describe("battle/turn", () => {
   beforeAll(() => {
     apply({ battle: { hit: "always" } });
   });
@@ -40,69 +45,74 @@ describe("battle", () => {
     let progress: Progress = {
       playerA: {
         ...playerA,
-        pokemons: [
-          {
-            ...rizadon,
-            status: {
-              ...rizadon.status,
-              hp: 1,
-            },
-          },
-          pikachu,
-        ],
+        pokemons: [damagedPokemon(rizadon, 1), pikachu],
       },
       playerB,
       environment: hail,
       log: [],
     };
     progress = passTurn(progress);
+    progress = runPrepare(progress, {
+      playerA: { index: 1 },
+    });
     expect(progress.log.map(toString)).toStrictEqual([
       "あられが 降りつづけている",
       "あられが リザードンを おそう！",
       "リザードンは たおれた！",
       "あられが カメックスを おそう！",
       "",
+      "satoshiは ピカチュウを繰り出した！",
+      "",
     ]);
   });
 
   test("場のポケモンが戦闘不能になったら次のポケモンを出す", () => {
     let progress: Progress = {
-      playerA: {
-        ...playerA,
-        pokemons: [
-          {
-            ...kamex,
-            status: {
-              ...kamex.status,
-              hp: 32,
-            },
-          },
-          rizadon,
-        ],
-      },
+      playerA,
       playerB: {
         ...playerB,
-        pokemons: [pikachu],
+        pokemons: [damagedPokemon(kamex, 1), rizadon],
       },
       environment: normalEnv,
       log: [],
     };
     progress = runAction(progress, {
       playerA: { type: "fight", index: 0 },
-      playerB: { type: "fight", index: 2 },
+      playerB: { type: "fight", index: 0 },
     });
     progress = passTurn(progress);
     progress = runPrepare(progress, {
-      playerA: { index: 1 },
+      playerB: { index: 1 },
     });
     expect(progress.log.map(toString)).toStrictEqual([
-      "ピカチュウの でんこうせっか！",
-      "カメックスは 17 ダメージ受けた！",
-      "カメックスの なみのり！",
-      "ピカチュウは 91 ダメージ受けた！",
+      "リザードンの かえんしょうしゃ！",
+      "カメックスは 31 ダメージ受けた！",
+      "カメックスは たおれた！",
       "",
-      "satoshiは リザードンを繰り出した！",
+      "shigeruは リザードンを繰り出した！",
       "",
+    ]);
+  });
+
+  test("一方の出せるポケモンがいなくなったらおしまい", () => {
+    let progress: Progress = {
+      playerA,
+      playerB: {
+        ...playerB,
+        pokemons: [damagedPokemon(kamex, 1)],
+      },
+      environment: normalEnv,
+      log: [],
+    };
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 0 },
+      playerB: { type: "fight", index: 0 },
+    });
+    expect(progress.log.map(toString)).toStrictEqual([
+      "リザードンの かえんしょうしゃ！",
+      "カメックスは 31 ダメージ受けた！",
+      "カメックスは たおれた！",
+      "shigeruとの 勝負に 勝った！",
     ]);
   });
 });

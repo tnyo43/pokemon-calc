@@ -7,7 +7,6 @@ export const seedBomb: Move = {
   pp: 15,
   accuracy: 100,
   moveType: "physical",
-  contact: false,
 };
 
 export const flamethrower: Move = {
@@ -17,7 +16,6 @@ export const flamethrower: Move = {
   pp: 15,
   accuracy: 100,
   moveType: "special",
-  contact: false,
 };
 
 export const flareBlitz: Move = {
@@ -37,7 +35,6 @@ export const surf: Move = {
   pp: 15,
   accuracy: 100,
   moveType: "special",
-  contact: false,
 };
 
 export const Thunderbolt: Move = {
@@ -47,7 +44,6 @@ export const Thunderbolt: Move = {
   pp: 15,
   accuracy: 100,
   moveType: "special",
-  contact: false,
 };
 
 export const voltTackle: Move = {
@@ -78,7 +74,6 @@ export const ancientPower: Move = {
   pp: 5,
   accuracy: 100,
   moveType: "special",
-  contact: false,
 };
 
 export const confusion: Move = {
@@ -88,7 +83,6 @@ export const confusion: Move = {
   pp: 25,
   accuracy: 100,
   moveType: "special",
-  contact: false,
 };
 
 export const dragonClaw: Move = {
@@ -108,7 +102,6 @@ export const dragonPulse: Move = {
   pp: 10,
   accuracy: 100,
   moveType: "special",
-  contact: false,
 };
 
 export const iceBeam: Move = {
@@ -118,7 +111,6 @@ export const iceBeam: Move = {
   pp: 10,
   accuracy: 100,
   moveType: "special",
-  contact: false,
 };
 
 export const iceShard: Move = {
@@ -128,8 +120,17 @@ export const iceShard: Move = {
   pp: 30,
   accuracy: 100,
   moveType: "physical",
-  contact: false,
+
   priority: 1,
+};
+
+export const blizzard: Move = {
+  name: "ふぶき",
+  type: "ice",
+  power: 5,
+  pp: 110,
+  accuracy: 70,
+  moveType: "special",
 };
 
 export const darkPulse: Move = {
@@ -139,7 +140,6 @@ export const darkPulse: Move = {
   pp: 15,
   accuracy: 100,
   moveType: "special",
-  contact: false,
 };
 
 export const growl: Move = {

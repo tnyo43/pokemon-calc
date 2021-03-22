@@ -14,11 +14,25 @@ import {
   weavile,
   fushigibana,
   solrock,
+  damagedPokemon,
 } from "__tests__/mock/pokemon";
+import * as mockRandom from "@/utils/random";
 
 describe("battle/action", () => {
+  let randomSpy: jest.SpyInstance<boolean, [p: number]>;
+
   beforeAll(() => {
-    apply({ battle: { hit: "always" } });
+    apply({ battle: { hit: "probability" } });
+  });
+
+  beforeEach(() => {
+    randomSpy = jest
+      .spyOn(mockRandom, "probability")
+      .mockImplementation((_) => true);
+  });
+
+  afterEach(() => {
+    randomSpy.mockClear();
   });
 
   test("通常の攻撃のやりとり", () => {
@@ -96,7 +110,7 @@ describe("battle/action", () => {
       playerA,
       playerB: {
         ...playerB,
-        pokemons: [{ ...kamex, status: { ...kamex.status, hp: 10 } }, pikachu],
+        pokemons: [damagedPokemon(kamex, 10), pikachu],
       },
       environment: normalEnv,
       log: [],
@@ -114,31 +128,47 @@ describe("battle/action", () => {
     ]);
   });
 
+  test("命中不安の技は外れる可能性がある", () => {
+    let progress: Progress = {
+      playerA: {
+        ...playerA,
+        pokemons: [weavile],
+      },
+      playerB,
+      environment: normalEnv,
+      log: [],
+    };
+    randomSpy = jest.spyOn(mockRandom, "probability").mockReturnValue(false);
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 2 },
+      playerB: { type: "fight", index: 0 },
+    });
+    randomSpy = jest.spyOn(mockRandom, "probability").mockReturnValue(true);
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 2 },
+      playerB: { type: "fight", index: 0 },
+    });
+    expect(progress.log.map(toString)).toStrictEqual([
+      "マニューラの ふぶき！",
+      "カメックスには 当たらなかった！",
+      "カメックスの なみのり！",
+      "マニューラは 61 ダメージ受けた！",
+      "マニューラの ふぶき！",
+      "カメックスは 2 ダメージ受けた！",
+      "カメックスの なみのり！",
+      "マニューラは 61 ダメージ受けた！",
+    ]);
+  });
+
   test("試合結果のログが追加される", () => {
     const beginning: Progress = {
       playerA: {
         ...playerA,
-        pokemons: [
-          {
-            ...pikachu,
-            status: {
-              ...pikachu.status,
-              hp: 1,
-            },
-          },
-        ],
+        pokemons: [damagedPokemon(pikachu, 1)],
       },
       playerB: {
         ...playerB,
-        pokemons: [
-          {
-            ...weavile,
-            status: {
-              ...weavile.status,
-              hp: 1,
-            },
-          },
-        ],
+        pokemons: [damagedPokemon(weavile, 1)],
       },
       environment: hail,
       log: [],
