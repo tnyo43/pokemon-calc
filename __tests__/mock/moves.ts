@@ -193,3 +193,20 @@ export const hypnosis: Move = {
   accuracy: 60,
   ailment: "sleep",
 };
+
+export const splash: Move = {
+  name: "はねる",
+  type: "normal",
+  pp: 40,
+  moveType: "helping",
+  accuracy: 100,
+};
+
+export const stunSpore: Move = {
+  name: "しびれごな",
+  type: "grass",
+  pp: 30,
+  moveType: "helping",
+  accuracy: 75,
+  ailment: "paralysis",
+};

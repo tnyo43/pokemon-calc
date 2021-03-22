@@ -33,6 +33,14 @@ export const pikachu: PokedexInfo = {
   abilities: ["せいでんき"],
 };
 
+export const magikarp: PokedexInfo = {
+  no: 129,
+  name: "コイキング",
+  types: ["water"],
+  baseStats: statistics(20, 10, 55, 15, 20, 80),
+  abilities: ["すいすい", "びびり"],
+};
+
 export const solrock: PokedexInfo = {
   no: 338,
   name: "ソルロック",

@@ -1,10 +1,10 @@
 import { Weather } from "@/domain/model/environment";
 import { Player } from "@/domain/model/player";
 import {
-  Ailment,
   StatusType,
   toString as toStringStatusParam,
 } from "@/domain/model/stats";
+import { Ailment } from "@/domain/model/ailment";
 
 export type Log =
   | { label: "action"; name: string; move: string }
@@ -13,6 +13,7 @@ export type Log =
   | { label: "protect succeed"; name: string }
   | { label: "ailment"; name: string; ailment: Ailment }
   | { label: "miss"; name: string }
+  | { label: "cannotMove"; name: string; cause: "paralysis" }
   | { label: "status"; name: string; param: StatusType; diff: number }
   | { label: "change"; player: string; pokemonFrom: string; pokemonTo: string }
   | { label: "weather"; weather: Weather; isEnd: boolean }
@@ -57,6 +58,9 @@ const toStringAilment = ({
 
 const toStringMiss = ({ name }: { name: string }) =>
   `${name}には 当たらなかった！`;
+
+const toStringCannotMove = ({ name }: { name: string; cause: "paralysis" }) =>
+  `${name}は 体がしびれて 動けない！`;
 
 const toStringStatus = ({
   name,
@@ -158,6 +162,8 @@ export const toString = (log: Log): string => {
       return toStringAilment(log);
     case "miss":
       return toStringMiss(log);
+    case "cannotMove":
+      return toStringCannotMove(log);
     case "status":
       return toStringStatus(log);
     case "change":

@@ -2,7 +2,7 @@ import { runAction } from "@/domain/controller/battle/action";
 import { passTurn } from "@/domain/controller/battle/turn";
 import { apply } from "@/domain/controller/move";
 import { currentPokemon } from "@/domain/controller/player";
-import { speed } from "@/domain/controller/pokemon";
+import { addAilment, speed } from "@/domain/controller/pokemon";
 import { Progress } from "@/domain/model/battle";
 import { toString } from "@/domain/model/log";
 import { hail, normalEnv, sunlight } from "__tests__/mock/environment";
@@ -15,6 +15,7 @@ import {
   fushigibana,
   solrock,
   damagedPokemon,
+  magikarp,
 } from "__tests__/mock/pokemon";
 import * as mockRandom from "@/utils/random";
 
@@ -338,5 +339,63 @@ describe("battle/action", () => {
       "フシギバナは 眠ってしまった！",
     ]);
     expect(currentPokemon(progress.playerB).condition.ailment).toBe("sleep");
+  });
+
+  test("状態異常になる", () => {
+    randomSpy = jest.spyOn(mockRandom, "probability").mockReturnValue(true);
+    const progress: Progress = {
+      playerA: {
+        ...playerA,
+        pokemons: [fushigibana],
+      },
+      playerB: {
+        ...playerB,
+        pokemons: [magikarp],
+      },
+      environment: normalEnv,
+      log: [],
+    };
+
+    expect(
+      runAction(progress, {
+        playerA: { type: "fight", index: 2 }, // しびれごな
+        playerB: { type: "fight", index: 0 },
+      }).log.map(toString)
+    ).toStrictEqual([
+      "フシギバナの しびれごな！",
+      "コイキングは まひして 技が でにくくなった！",
+      "コイキングは 体がしびれて 動けない！",
+    ]);
+  });
+
+  test("まひすると技が失敗することがある", () => {
+    let progress: Progress = {
+      playerA: {
+        ...playerA,
+        pokemons: [addAilment(weavile, "paralysis")],
+      },
+      playerB,
+      environment: normalEnv,
+      log: [],
+    };
+    randomSpy = jest.spyOn(mockRandom, "probability").mockReturnValue(false);
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 0 },
+      playerB: { type: "fight", index: 0 },
+    });
+    randomSpy = jest.spyOn(mockRandom, "probability").mockReturnValue(true);
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 2 },
+      playerB: { type: "fight", index: 0 },
+    });
+    expect(progress.log.map(toString)).toStrictEqual([
+      "カメックスの なみのり！",
+      "マニューラは 61 ダメージ受けた！",
+      "マニューラの あくのはどう！",
+      "カメックスは 27 ダメージ受けた！",
+      "カメックスの なみのり！",
+      "マニューラは 61 ダメージ受けた！",
+      "マニューラは 体がしびれて 動けない！",
+    ]);
   });
 });

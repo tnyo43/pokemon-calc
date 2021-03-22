@@ -2,6 +2,7 @@ import {
   attack,
   defence,
   specialAttack,
+  speed,
   updateStatus,
   canMove,
   reducePP,
@@ -14,6 +15,7 @@ import {
   rizadon,
 } from "__tests__/mock/pokemon";
 import { Pokemon } from "@/domain/model/pokemon";
+import { normalEnv } from "__tests__/mock/environment";
 
 describe("pokemon", () => {
   describe("各ステータスの計算", () => {
@@ -38,19 +40,19 @@ describe("pokemon", () => {
 
   describe("ダメージの計算", () => {
     test("でんき->みず 効果はばつぐん", () => {
-      expect(damage(0, pikachu, kamex)).toBe(62);
-      expect(damage(1, pikachu, kamex)).toBe(146);
+      expect(damage(0, pikachu, kamex, normalEnv)).toBe(62);
+      expect(damage(1, pikachu, kamex, normalEnv)).toBe(146);
     });
     test("でんき->くさ 効果はいまひとつ", () => {
-      expect(damage(0, pikachu, fushigibana)).toBe(16);
-      expect(damage(1, pikachu, fushigibana)).toBe(42);
+      expect(damage(0, pikachu, fushigibana, normalEnv)).toBe(16);
+      expect(damage(1, pikachu, fushigibana, normalEnv)).toBe(42);
     });
     test("ほのお->でんき 効果はふつう", () => {
-      expect(damage(0, rizadon, pikachu)).toBe(111);
-      expect(damage(1, rizadon, pikachu)).toBe(139);
+      expect(damage(0, rizadon, pikachu, normalEnv)).toBe(111);
+      expect(damage(1, rizadon, pikachu, normalEnv)).toBe(139);
     });
     test("タイプ不一致", () => {
-      expect(damage(2, pikachu, rizadon)).toBe(21);
+      expect(damage(2, pikachu, rizadon, normalEnv)).toBe(21);
     });
   });
 
@@ -97,5 +99,18 @@ describe("pokemon", () => {
 
     p = reducePP(p, 0, 15);
     expect(canMove(p, 0)).toBe(false);
+  });
+
+  describe("麻痺になると素早さが半減する", () => {
+    expect(speed(rizadon)).toBe(120);
+    expect(
+      speed({
+        ...rizadon,
+        condition: {
+          ...rizadon.condition,
+          ailment: "paralysis",
+        },
+      })
+    ).toBe(60);
   });
 });

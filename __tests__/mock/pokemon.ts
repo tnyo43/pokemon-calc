@@ -10,7 +10,7 @@ export const damage = (
   index: number,
   attacker: Pokemon,
   defencer: Pokemon,
-  env?: Environment
+  env: Environment
 ) => {
   const move = attacker.moves[index];
   return move.moveType === "helping"
@@ -29,7 +29,7 @@ export const damagedPokemon = (pokemon: Pokemon, hp: number) => ({
 export const fushigibana: Pokemon = pokemon(
   Pokedex.fushigibana,
   50,
-  [Moves.seedBomb, Moves.protect],
+  [Moves.seedBomb, Moves.protect, Moves.stunSpore],
   0,
   statistics(4, 0, 0, 252, 0, 252),
   statistics(31, 31, 31, 31, 31, 31),
@@ -64,6 +64,16 @@ export const pikachu: Pokemon = pokemon(
   statistics(4, 252, 0, 0, 0, 252),
   statistics(31, 31, 31, 31, 31, 31),
   { up: "speed", down: "specialAttack" }
+);
+
+export const magikarp: Pokemon = pokemon(
+  Pokedex.magikarp,
+  50,
+  [Moves.splash],
+  0,
+  statistics(0, 0, 0, 0, 0, 0),
+  statistics(31, 31, 31, 31, 31, 31),
+  null
 );
 
 export const solrock: Pokemon = pokemon(

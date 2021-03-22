@@ -9,13 +9,16 @@ import {
   updatePokemon,
 } from "@/domain/controller/player";
 import {
+  addAilment,
   beHurt,
   convertStatus,
   damage,
+  hasAilment,
   reducePP,
   updateStatus,
 } from "@/domain/controller/pokemon";
 import { Player } from "@/domain/model/player";
+import { probability } from "@/utils/random";
 
 type Args = {
   attacker: Player;
@@ -138,15 +141,12 @@ const helping = (
         )
       );
     }
-    if (move.ailment) {
+    if (move.ailment && hasAilment(currentPokemon(attacker))) {
       log = Log.add(log, Log.ailment(currentPokemon(defencer), move.ailment));
-      defencer = updatePokemon(defencer, {
-        ...currentPokemon(defencer),
-        condition: {
-          ...currentPokemon(defencer).condition,
-          ailment: move.ailment,
-        },
-      });
+      defencer = updatePokemon(
+        defencer,
+        addAilment(currentPokemon(defencer), move.ailment)
+      );
     }
   }
 
@@ -185,6 +185,19 @@ const action = (
   };
 
   if (progress.winner || needToChange(args.attacker)) return progress;
+
+  if (
+    hasAilment(currentPokemon(args.attacker), "paralysis") &&
+    probability(0.25)
+  ) {
+    return {
+      ...progress,
+      log: Log.add(
+        progress.log,
+        Log.cannotMove(currentPokemon(args.attacker), "paralysis")
+      ),
+    };
+  }
 
   args.attacker = updatePokemon(
     args.attacker,

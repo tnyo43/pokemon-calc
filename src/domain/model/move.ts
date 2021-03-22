@@ -1,5 +1,6 @@
 import { Type } from "@/domain/model/type";
-import { Ailment, Status } from "@/domain/model/stats";
+import { Status } from "@/domain/model/stats";
+import { Ailment } from "@/domain/model/ailment";
 
 type AttackMoveType = "physical" | "special";
 export type MoveType = AttackMoveType | "helping";
