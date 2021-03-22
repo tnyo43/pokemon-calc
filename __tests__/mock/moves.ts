@@ -210,3 +210,21 @@ export const stunSpore: Move = {
   accuracy: 75,
   ailment: "paralysis",
 };
+
+export const poisonPowder: Move = {
+  name: "どくのこな",
+  type: "poison",
+  pp: 35,
+  moveType: "helping",
+  accuracy: 75,
+  ailment: "poison",
+};
+
+export const toxic: Move = {
+  name: "どくどく",
+  type: "poison",
+  pp: 10,
+  moveType: "helping",
+  accuracy: 90,
+  ailment: "bad poison",
+};

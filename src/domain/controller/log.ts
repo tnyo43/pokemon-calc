@@ -37,8 +37,17 @@ export const protectSucceed = (pokemon: Pokemon): Log => ({
   name: pokemon.name,
 });
 
-export const ailment = (pokemon: Pokemon, ailment: Ailment): Log => ({
+export const ailment = (pokemon: Pokemon, ailment: Ailment["label"]): Log => ({
   label: "ailment",
+  name: pokemon.name,
+  ailment,
+});
+
+export const ailmentDamage = (
+  pokemon: Pokemon,
+  ailment: "poison" | "bad poison"
+): Log => ({
+  label: "ailment damage",
   name: pokemon.name,
   ailment,
 });

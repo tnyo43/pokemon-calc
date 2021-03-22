@@ -29,7 +29,7 @@ export const damagedPokemon = (pokemon: Pokemon, hp: number) => ({
 export const fushigibana: Pokemon = pokemon(
   Pokedex.fushigibana,
   50,
-  [Moves.seedBomb, Moves.protect, Moves.stunSpore],
+  [Moves.seedBomb, Moves.protect],
   0,
   statistics(4, 0, 0, 252, 0, 252),
   statistics(31, 31, 31, 31, 31, 31),
@@ -73,7 +73,17 @@ export const magikarp: Pokemon = pokemon(
   0,
   statistics(0, 0, 0, 0, 0, 0),
   statistics(31, 31, 31, 31, 31, 31),
-  null
+  { up: "attack", down: "speed" }
+);
+
+export const breloom: Pokemon = pokemon(
+  Pokedex.breloom,
+  50,
+  [Moves.stunSpore, Moves.poisonPowder, Moves.toxic],
+  0,
+  statistics(12, 252, 28, 0, 4, 212),
+  statistics(31, 31, 31, 31, 31, 31),
+  { up: "speed", down: "specialAttack" }
 );
 
 export const solrock: Pokemon = pokemon(

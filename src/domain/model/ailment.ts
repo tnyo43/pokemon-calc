@@ -1,13 +1,13 @@
 export type Ailment =
-  | "burn"
-  | "freeze"
-  | "paralysis"
-  | "poison"
-  | "bad poison"
-  | "sleep";
+  | { label: "burn" }
+  | { label: "freeze" }
+  | { label: "paralysis" }
+  | { label: "poison" }
+  | { label: "bad poison"; past: number }
+  | { label: "sleep" };
 
 export const toStringAilment = (ailment: Ailment) => {
-  switch (ailment) {
+  switch (ailment.label) {
     case "burn":
       return "やけど";
     case "freeze":

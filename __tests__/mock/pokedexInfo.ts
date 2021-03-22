@@ -41,6 +41,14 @@ export const magikarp: PokedexInfo = {
   abilities: ["すいすい", "びびり"],
 };
 
+export const breloom: PokedexInfo = {
+  no: 286,
+  name: "キノガッサ",
+  types: ["grass", "poison"],
+  baseStats: statistics(60, 130, 80, 60, 60, 70),
+  abilities: ["ほうし", "ポイズンヒール", "テクニシャン"],
+};
+
 export const solrock: PokedexInfo = {
   no: 338,
   name: "ソルロック",

@@ -30,7 +30,7 @@ export type HelpingMove = {
     opponent?: Partial<BuffStatus>;
   };
   protect?: boolean;
-  ailment?: Ailment;
+  ailment?: Ailment["label"];
 };
 
 export type Move = AttackMove | HelpingMove;

@@ -16,6 +16,7 @@ import {
   solrock,
   damagedPokemon,
   magikarp,
+  breloom,
 } from "__tests__/mock/pokemon";
 import * as mockRandom from "@/utils/random";
 
@@ -338,7 +339,9 @@ describe("battle/action", () => {
       "ソルロックの さいみんじゅつ！",
       "フシギバナは 眠ってしまった！",
     ]);
-    expect(currentPokemon(progress.playerB).condition.ailment).toBe("sleep");
+    expect(currentPokemon(progress.playerB).condition.ailment?.label).toBe(
+      "sleep"
+    );
   });
 
   test("状態異常になる", () => {
@@ -346,7 +349,7 @@ describe("battle/action", () => {
     const progress: Progress = {
       playerA: {
         ...playerA,
-        pokemons: [fushigibana],
+        pokemons: [breloom],
       },
       playerB: {
         ...playerB,
@@ -358,13 +361,35 @@ describe("battle/action", () => {
 
     expect(
       runAction(progress, {
-        playerA: { type: "fight", index: 2 }, // しびれごな
+        playerA: { type: "fight", index: 0 }, // しびれごな
         playerB: { type: "fight", index: 0 },
       }).log.map(toString)
     ).toStrictEqual([
-      "フシギバナの しびれごな！",
+      "キノガッサの しびれごな！",
       "コイキングは まひして 技が でにくくなった！",
       "コイキングは 体がしびれて 動けない！",
+    ]);
+
+    expect(
+      runAction(progress, {
+        playerA: { type: "fight", index: 1 }, // どくのこな
+        playerB: { type: "fight", index: 0 },
+      }).log.map(toString)
+    ).toStrictEqual([
+      "キノガッサの どくのこな！",
+      "コイキングは 毒を あびた！",
+      "コイキングの はねる！",
+    ]);
+
+    expect(
+      runAction(progress, {
+        playerA: { type: "fight", index: 2 }, // どくどく
+        playerB: { type: "fight", index: 0 },
+      }).log.map(toString)
+    ).toStrictEqual([
+      "キノガッサの どくどく！",
+      "コイキングは 猛毒を あびた！",
+      "コイキングの はねる！",
     ]);
   });
 

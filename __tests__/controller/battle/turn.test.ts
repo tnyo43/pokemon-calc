@@ -2,6 +2,7 @@ import { runAction } from "@/domain/controller/battle/action";
 import { passTurn, runPrepare } from "@/domain/controller/battle/turn";
 import { apply } from "@/domain/controller/move";
 import { currentPokemon } from "@/domain/controller/player";
+import { addAilment } from "@/domain/controller/pokemon";
 import { Progress } from "@/domain/model/battle";
 import { toString } from "@/domain/model/log";
 import { hail, normalEnv, sandstormMisty } from "__tests__/mock/environment";
@@ -113,6 +114,62 @@ describe("battle/turn", () => {
       "カメックスは 31 ダメージ受けた！",
       "カメックスは たおれた！",
       "shigeruとの 勝負に 勝った！",
+    ]);
+  });
+
+  test("どくになると継続的にダメージを受ける", () => {
+    let progress: Progress = {
+      playerA: {
+        ...playerA,
+        pokemons: [addAilment(pikachu, "poison")],
+      },
+      playerB,
+      environment: normalEnv,
+      log: [],
+    };
+    progress = passTurn(progress);
+    expect(currentPokemon(progress.playerA).status.hp).toBe(
+      pikachu.basicValue.hp - Math.floor(pikachu.basicValue.hp / 8)
+    );
+    expect(progress.log.map(toString)).toStrictEqual([
+      "ピカチュウは 毒の ダメージを受けた！",
+      "",
+    ]);
+  });
+
+  test("もうどくになるとダメージも増える", () => {
+    let progress: Progress = {
+      playerA: {
+        ...playerA,
+        pokemons: [addAilment(pikachu, "bad poison")],
+      },
+      playerB,
+      environment: normalEnv,
+      log: [],
+    };
+    const maxHp = pikachu.basicValue.hp;
+    let expectedHp = pikachu.basicValue.hp;
+    progress = passTurn(progress);
+    expectedHp -= Math.floor(maxHp / 16);
+    expect(currentPokemon(progress.playerA).status.hp).toBe(expectedHp);
+    progress = passTurn(progress);
+    expectedHp -= Math.floor((maxHp * 2) / 16);
+    expect(currentPokemon(progress.playerA).status.hp).toBe(expectedHp);
+    progress = passTurn(progress);
+    expectedHp -= Math.floor((maxHp * 3) / 16);
+    expect(currentPokemon(progress.playerA).status.hp).toBe(expectedHp);
+    progress = passTurn(progress);
+    expectedHp -= Math.floor((maxHp * 4) / 16);
+    expect(currentPokemon(progress.playerA).status.hp).toBe(expectedHp);
+    expect(progress.log.map(toString)).toStrictEqual([
+      "ピカチュウは 毒の ダメージを受けた！",
+      "",
+      "ピカチュウは 毒の ダメージを受けた！",
+      "",
+      "ピカチュウは 毒の ダメージを受けた！",
+      "",
+      "ピカチュウは 毒の ダメージを受けた！",
+      "",
     ]);
   });
 });

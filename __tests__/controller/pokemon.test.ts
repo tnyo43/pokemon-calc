@@ -16,6 +16,7 @@ import {
 } from "__tests__/mock/pokemon";
 import { Pokemon } from "@/domain/model/pokemon";
 import { normalEnv } from "__tests__/mock/environment";
+import { initAilment } from "@/domain/controller/ailment";
 
 describe("pokemon", () => {
   describe("各ステータスの計算", () => {
@@ -108,7 +109,7 @@ describe("pokemon", () => {
         ...rizadon,
         condition: {
           ...rizadon.condition,
-          ailment: "paralysis",
+          ailment: initAilment("paralysis"),
         },
       })
     ).toBe(60);
