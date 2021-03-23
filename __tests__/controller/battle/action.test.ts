@@ -6,7 +6,7 @@ import { speed } from "@/domain/controller/pokemon";
 import { Progress } from "@/domain/model/battle";
 import { toString } from "@/domain/model/log";
 import { hail, normalEnv, sunlight } from "__tests__/mock/environment";
-import { playerA, playerB } from "__tests__/mock/player";
+import { player, playerA, playerB } from "__tests__/mock/player";
 import {
   kamex,
   pikachu,
@@ -19,20 +19,17 @@ import {
 import * as mockRandom from "@/utils/random";
 
 describe("battle/action", () => {
-  let randomSpy: jest.SpyInstance<boolean, [p: number]>;
-
-  beforeAll(() => {
-    apply({ battle: { hit: "probability" } });
-  });
+  let probabilitySpy: jest.SpyInstance<boolean, [p: number]>;
 
   beforeEach(() => {
-    randomSpy = jest
+    probabilitySpy = jest
       .spyOn(mockRandom, "probability")
       .mockImplementation((_) => true);
+    apply({ battle: { hit: "probability", sideEffect: "none" } });
   });
 
   afterEach(() => {
-    randomSpy.mockClear();
+    probabilitySpy.mockClear();
   });
 
   test("通常の攻撃のやりとり", () => {
@@ -78,14 +75,8 @@ describe("battle/action", () => {
 
   test("優先度+1のわざが先に出る", () => {
     let progress: Progress = {
-      playerA: {
-        ...playerA,
-        pokemons: [pikachu],
-      },
-      playerB: {
-        ...playerB,
-        pokemons: [weavile],
-      },
+      playerA: player([pikachu]),
+      playerB: player([weavile]),
       environment: normalEnv,
       log: [],
     };
@@ -108,10 +99,7 @@ describe("battle/action", () => {
   test("残りHPが0になると戦闘不能になる", () => {
     let progress: Progress = {
       playerA,
-      playerB: {
-        ...playerB,
-        pokemons: [damagedPokemon(kamex, 10), pikachu],
-      },
+      playerB: player([damagedPokemon(kamex, 10), pikachu]),
       environment: normalEnv,
       log: [],
     };
@@ -130,20 +118,21 @@ describe("battle/action", () => {
 
   test("命中不安の技は外れる可能性がある", () => {
     let progress: Progress = {
-      playerA: {
-        ...playerA,
-        pokemons: [weavile],
-      },
+      playerA: player([weavile]),
       playerB,
       environment: normalEnv,
       log: [],
     };
-    randomSpy = jest.spyOn(mockRandom, "probability").mockReturnValue(false);
+    probabilitySpy = jest
+      .spyOn(mockRandom, "probability")
+      .mockReturnValue(false);
     progress = runAction(progress, {
       playerA: { type: "fight", index: 2 },
       playerB: { type: "fight", index: 0 },
     });
-    randomSpy = jest.spyOn(mockRandom, "probability").mockReturnValue(true);
+    probabilitySpy = jest
+      .spyOn(mockRandom, "probability")
+      .mockReturnValue(true);
     progress = runAction(progress, {
       playerA: { type: "fight", index: 2 },
       playerB: { type: "fight", index: 0 },
@@ -162,14 +151,8 @@ describe("battle/action", () => {
 
   test("試合結果のログが追加される", () => {
     const beginning: Progress = {
-      playerA: {
-        ...playerA,
-        pokemons: [damagedPokemon(pikachu, 1)],
-      },
-      playerB: {
-        ...playerB,
-        pokemons: [damagedPokemon(weavile, 1)],
-      },
+      playerA: player([damagedPokemon(pikachu, 1)]),
+      playerB: player([damagedPokemon(weavile, 1)], "shigeru"),
       environment: hail,
       log: [],
     };
@@ -197,14 +180,8 @@ describe("battle/action", () => {
 
   test("ポケモンを交換できる", () => {
     let progress: Progress = {
-      playerA: {
-        ...playerA,
-        pokemons: [kamex, pikachu],
-      },
-      playerB: {
-        ...playerB,
-        pokemons: [weavile, rizadon],
-      },
+      playerA: player([kamex, pikachu], "satoshi"),
+      playerB: player([weavile, rizadon], "shigeru"),
       environment: normalEnv,
       log: [],
     };
@@ -266,14 +243,8 @@ describe("battle/action", () => {
 
   test("まもるを発動する", () => {
     let progress: Progress = {
-      playerA: {
-        ...playerA,
-        pokemons: [fushigibana],
-      },
-      playerB: {
-        ...playerB,
-        pokemons: [weavile],
-      },
+      playerA: player([fushigibana]),
+      playerB: player([weavile]),
       environment: normalEnv,
       log: [],
     };
@@ -306,14 +277,8 @@ describe("battle/action", () => {
 
   test("さいみんじゅつで眠る", () => {
     let progress: Progress = {
-      playerA: {
-        ...playerA,
-        pokemons: [solrock],
-      },
-      playerB: {
-        ...playerB,
-        pokemons: [fushigibana],
-      },
+      playerA: player([solrock]),
+      playerB: player([fushigibana]),
       environment: normalEnv,
       log: [],
     };
@@ -337,6 +302,8 @@ describe("battle/action", () => {
       "ソルロックの さいみんじゅつ！",
       "フシギバナは 眠ってしまった！",
     ]);
-    expect(currentPokemon(progress.playerB).condition.ailment).toBe("sleep");
+    expect(currentPokemon(progress.playerB).condition.ailment?.label).toBe(
+      "sleep"
+    );
   });
 });

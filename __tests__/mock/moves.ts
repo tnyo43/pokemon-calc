@@ -16,6 +16,12 @@ export const flamethrower: Move = {
   pp: 15,
   accuracy: 100,
   moveType: "special",
+  sideEffect: {
+    ailment: {
+      label: "burn",
+      percentage: 10,
+    },
+  },
 };
 
 export const flareBlitz: Move = {
@@ -26,6 +32,12 @@ export const flareBlitz: Move = {
   accuracy: 100,
   moveType: "physical",
   contact: true,
+  sideEffect: {
+    ailment: {
+      label: "burn",
+      percentage: 10,
+    },
+  },
 };
 
 export const surf: Move = {
@@ -44,6 +56,12 @@ export const Thunderbolt: Move = {
   pp: 15,
   accuracy: 100,
   moveType: "special",
+  sideEffect: {
+    ailment: {
+      label: "paralysis",
+      percentage: 10,
+    },
+  },
 };
 
 export const voltTackle: Move = {
@@ -54,6 +72,12 @@ export const voltTackle: Move = {
   accuracy: 100,
   moveType: "physical",
   contact: true,
+  sideEffect: {
+    ailment: {
+      label: "paralysis",
+      percentage: 10,
+    },
+  },
 };
 
 export const quickAttack: Move = {
@@ -111,6 +135,12 @@ export const iceBeam: Move = {
   pp: 10,
   accuracy: 100,
   moveType: "special",
+  sideEffect: {
+    ailment: {
+      label: "freeze",
+      percentage: 10,
+    },
+  },
 };
 
 export const iceShard: Move = {
@@ -120,7 +150,6 @@ export const iceShard: Move = {
   pp: 30,
   accuracy: 100,
   moveType: "physical",
-
   priority: 1,
 };
 
@@ -131,6 +160,12 @@ export const blizzard: Move = {
   pp: 110,
   accuracy: 70,
   moveType: "special",
+  sideEffect: {
+    ailment: {
+      label: "freeze",
+      percentage: 10,
+    },
+  },
 };
 
 export const darkPulse: Move = {
@@ -192,4 +227,39 @@ export const hypnosis: Move = {
   moveType: "helping",
   accuracy: 60,
   ailment: "sleep",
+};
+
+export const splash: Move = {
+  name: "はねる",
+  type: "normal",
+  pp: 40,
+  moveType: "helping",
+  accuracy: 100,
+};
+
+export const stunSpore: Move = {
+  name: "しびれごな",
+  type: "grass",
+  pp: 30,
+  moveType: "helping",
+  accuracy: 75,
+  ailment: "paralysis",
+};
+
+export const poisonPowder: Move = {
+  name: "どくのこな",
+  type: "poison",
+  pp: 35,
+  moveType: "helping",
+  accuracy: 75,
+  ailment: "poison",
+};
+
+export const toxic: Move = {
+  name: "どくどく",
+  type: "poison",
+  pp: 10,
+  moveType: "helping",
+  accuracy: 90,
+  ailment: "bad poison",
 };

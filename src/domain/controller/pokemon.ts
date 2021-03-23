@@ -10,6 +10,7 @@ import {
   isWeatherActive,
 } from "@/domain/controller/environment";
 import { plusMinusNumber as pm } from "@/utils/format";
+import { hasAilment } from "@/domain/controller/ailment";
 
 type CalcParams = {
   baseStats: Statistics;
@@ -88,28 +89,30 @@ const calcStatus = (
   );
 };
 
-export const attack = (pokemon: CalcParams) => calcStatus(pokemon, "attack");
-export const defence = (pokemon: CalcParams) => calcStatus(pokemon, "defence");
-export const specialAttack = (pokemon: CalcParams) =>
+const attackSub = (pokemon: CalcParams) => calcStatus(pokemon, "attack");
+const defenceSub = (pokemon: CalcParams) => calcStatus(pokemon, "defence");
+const specialAttackSub = (pokemon: CalcParams) =>
   calcStatus(pokemon, "specialAttack");
-export const specialDefence = (pokemon: CalcParams) =>
+const specialDefenceSub = (pokemon: CalcParams) =>
   calcStatus(pokemon, "specialDefence");
-export const speed = (pokemon: CalcParams) => calcStatus(pokemon, "speed");
+const speedSub = (pokemon: CalcParams) => calcStatus(pokemon, "speed");
 
-const defenceWithEnv = (pokemon: Pokemon, _: Environment | undefined) =>
-  defence(pokemon);
-const specialDefenceWithEnv = (
-  pokemon: Pokemon,
-  environment: Environment | undefined
-) => {
+export const attack = (pokemon: Pokemon, _?: Environment) => attackSub(pokemon);
+export const defence = (pokemon: Pokemon, _?: Environment) =>
+  defenceSub(pokemon);
+export const specialAttack = (pokemon: Pokemon, _?: Environment) =>
+  specialAttackSub(pokemon);
+export const specialDefence = (pokemon: Pokemon, environment?: Environment) => {
   const coeff =
     environment &&
     isWeatherActive(environment, "sandstorm") &&
     hasType(pokemon, "rock")
       ? 1.5
       : 1;
-  return Math.floor(coeff * specialDefence(pokemon));
+  return Math.floor(coeff * specialDefenceSub(pokemon));
 };
+export const speed = (pokemon: Pokemon, _?: Environment) =>
+  Math.floor((hasAilment(pokemon, "paralysis") ? 0.5 : 1) * speedSub(pokemon));
 
 const power = (move: AttackMove, environment?: Environment) => {
   const powerCoeficient = !environment
@@ -144,26 +147,32 @@ export const damage = (
   move: AttackMove,
   attacker: Pokemon,
   defencer: Pokemon,
-  environment?: Environment
+  environment: Environment
 ) => {
   const [attackFuncion, defenceFunction] =
     move.moveType === "physical"
-      ? [attack, defenceWithEnv]
-      : [specialAttack, specialDefenceWithEnv];
+      ? [attack, defence]
+      : [specialAttack, specialDefence];
   const baseDamage =
     Math.floor(
       Math.floor(
         (Math.floor((attacker.level * 2) / 5 + 2) *
           power(move, environment) *
-          attackFuncion(attacker)) /
+          attackFuncion(attacker, environment)) /
           defenceFunction(defencer, environment)
       ) / 50
     ) + 2;
+  const burnCoeff =
+    move.moveType === "physical" && attacker.condition.ailment?.label === "burn"
+      ? 0.5
+      : 1;
   return Math.floor(
     Math.floor(
-      Math.floor(baseDamage * weatherCoefficient(move, environment)) *
-        typeCoefficient(attacker, move)
-    ) * compatibility(move.type, defencer.types)
+      Math.floor(
+        Math.floor(baseDamage * weatherCoefficient(move, environment)) *
+          typeCoefficient(attacker, move)
+      ) * compatibility(move.type, defencer.types)
+    ) * burnCoeff
   );
 };
 
@@ -263,11 +272,11 @@ export const pokemon = (
     characteristic,
     basicValue: {
       hp: hpValue,
-      attack: attack(params),
-      defence: defence(params),
-      specialAttack: specialAttack(params),
-      specialDefence: specialDefence(params),
-      speed: speed(params),
+      attack: attackSub(params),
+      defence: defenceSub(params),
+      specialAttack: specialAttackSub(params),
+      specialDefence: specialDefenceSub(params),
+      speed: speedSub(params),
     },
     condition: {},
     pp: moves.map((m) => m.pp),

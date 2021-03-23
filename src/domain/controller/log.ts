@@ -3,7 +3,8 @@ import { Weather } from "@/domain/model/environment";
 import { Log, toString } from "@/domain/model/log";
 import { Player } from "@/domain/model/player";
 import { Pokemon } from "@/domain/model/pokemon";
-import { Ailment, Status } from "@/domain/model/stats";
+import { Status } from "@/domain/model/stats";
+import { Ailment } from "@/domain/model/ailment";
 import { Move } from "@/domain/model/move";
 
 let config = defaultConfig;
@@ -36,8 +37,17 @@ export const protectSucceed = (pokemon: Pokemon): Log => ({
   name: pokemon.name,
 });
 
-export const ailment = (pokemon: Pokemon, ailment: Ailment): Log => ({
+export const ailment = (pokemon: Pokemon, ailment: Ailment["label"]): Log => ({
   label: "ailment",
+  name: pokemon.name,
+  ailment,
+});
+
+export const ailmentDamage = (
+  pokemon: Pokemon,
+  ailment: "poison" | "bad poison" | "burn"
+): Log => ({
+  label: "ailment damage",
   name: pokemon.name,
   ailment,
 });
@@ -45,6 +55,24 @@ export const ailment = (pokemon: Pokemon, ailment: Ailment): Log => ({
 export const miss = (pokemon: Pokemon): Log => ({
   label: "miss",
   name: pokemon.name,
+});
+
+export const failed = (): Log => ({
+  label: "failed",
+});
+export const cannotMove = (
+  pokemon: Pokemon,
+  cause: "paralysis" | "freeze" | "sleep"
+): Log => ({
+  label: "cannotMove",
+  name: pokemon.name,
+  cause,
+});
+
+export const recover = (pokemon: Pokemon, cause: "freeze" | "sleep"): Log => ({
+  label: "recover",
+  name: pokemon.name,
+  cause,
 });
 
 export const status = (pokemon: Pokemon, status: Partial<Status>): Log[] =>

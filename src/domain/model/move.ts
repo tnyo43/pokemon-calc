@@ -1,5 +1,6 @@
 import { Type } from "@/domain/model/type";
-import { Ailment, Status } from "@/domain/model/stats";
+import { Status } from "@/domain/model/stats";
+import { Ailment } from "@/domain/model/ailment";
 
 type AttackMoveType = "physical" | "special";
 export type MoveType = AttackMoveType | "helping";
@@ -13,6 +14,12 @@ export type AttackMove = {
   moveType: AttackMoveType;
   contact?: boolean;
   priority?: number;
+  sideEffect?: {
+    ailment?: {
+      label: Ailment["label"];
+      percentage: number;
+    };
+  };
 };
 
 export type BuffStatus = Status & { hpRate: number };
@@ -29,7 +36,7 @@ export type HelpingMove = {
     opponent?: Partial<BuffStatus>;
   };
   protect?: boolean;
-  ailment?: Ailment;
+  ailment?: Ailment["label"];
 };
 
 export type Move = AttackMove | HelpingMove;

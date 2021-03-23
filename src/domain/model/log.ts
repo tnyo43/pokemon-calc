@@ -1,18 +1,30 @@
 import { Weather } from "@/domain/model/environment";
 import { Player } from "@/domain/model/player";
 import {
-  Ailment,
   StatusType,
   toString as toStringStatusParam,
 } from "@/domain/model/stats";
+import { Ailment } from "@/domain/model/ailment";
 
 export type Log =
   | { label: "action"; name: string; move: string }
   | { label: "damage"; name: string; damage: number }
   | { label: "protect"; name: string }
   | { label: "protect succeed"; name: string }
-  | { label: "ailment"; name: string; ailment: Ailment }
+  | { label: "ailment"; name: string; ailment: Ailment["label"] }
+  | {
+      label: "ailment damage";
+      name: string;
+      ailment: "poison" | "bad poison" | "burn";
+    }
   | { label: "miss"; name: string }
+  | { label: "failed" }
+  | {
+      label: "cannotMove";
+      name: string;
+      cause: "paralysis" | "freeze" | "sleep";
+    }
+  | { label: "recover"; name: string; cause: "freeze" | "sleep" }
   | { label: "status"; name: string; param: StatusType; diff: number }
   | { label: "change"; player: string; pokemonFrom: string; pokemonTo: string }
   | { label: "weather"; weather: Weather; isEnd: boolean }
@@ -39,7 +51,7 @@ const toStringAilment = ({
   ailment,
 }: {
   name: string;
-  ailment: Ailment;
+  ailment: Ailment["label"];
 }) =>
   `${name}は ${
     ailment === "burn"
@@ -55,8 +67,43 @@ const toStringAilment = ({
       : "眠ってしまった"
   }！`;
 
+const toStringAilmentDamage = ({
+  name,
+  ailment,
+}: {
+  name: string;
+  ailment: "poison" | "bad poison" | "burn";
+}) => `${name}は ${ailment === "burn" ? "やけど" : "毒"}の ダメージを受けた！`;
+
 const toStringMiss = ({ name }: { name: string }) =>
   `${name}には 当たらなかった！`;
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+const toStringFailed = (_: {}) => "しかし うまくきまらなかった";
+
+const toStringCannotMove = ({
+  name,
+  cause,
+}: {
+  name: string;
+  cause: "paralysis" | "freeze" | "sleep";
+}) =>
+  cause === "sleep"
+    ? `${name}は ぐうぐうねむっている`
+    : `${name}は ${
+        cause === "paralysis" ? "体がしびれて" : "凍ってしまって"
+      } 動けない！`;
+
+const toStringRecover = ({
+  name,
+  cause,
+}: {
+  name: string;
+  cause: "freeze" | "sleep";
+}) =>
+  cause === "sleep"
+    ? `${name}は 目をさました！`
+    : `${name}の こおりが とけた！`;
 
 const toStringStatus = ({
   name,
@@ -156,8 +203,16 @@ export const toString = (log: Log): string => {
       return toStringProtectSucceed(log);
     case "ailment":
       return toStringAilment(log);
+    case "ailment damage":
+      return toStringAilmentDamage(log);
     case "miss":
       return toStringMiss(log);
+    case "failed":
+      return toStringFailed(log);
+    case "cannotMove":
+      return toStringCannotMove(log);
+    case "recover":
+      return toStringRecover(log);
     case "status":
       return toStringStatus(log);
     case "change":
