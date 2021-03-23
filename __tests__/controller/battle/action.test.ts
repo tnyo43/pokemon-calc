@@ -2,7 +2,7 @@ import { runAction } from "@/domain/controller/battle/action";
 import { passTurn } from "@/domain/controller/battle/turn";
 import { apply } from "@/domain/controller/move";
 import { currentPokemon } from "@/domain/controller/player";
-import { addAilment, speed } from "@/domain/controller/pokemon";
+import { speed } from "@/domain/controller/pokemon";
 import { Progress } from "@/domain/model/battle";
 import { toString } from "@/domain/model/log";
 import { hail, normalEnv, sunlight } from "__tests__/mock/environment";
@@ -18,9 +18,9 @@ import {
   magikarp,
   breloom,
 } from "__tests__/mock/pokemon";
-import * as mockAilment from "@/domain/controller/ailment";
 import * as mockRandom from "@/utils/random";
 import { Ailment } from "@/domain/model/ailment";
+import { addAilment } from "@/domain/controller/ailment";
 import { Pokemon } from "@/domain/model/pokemon";
 
 describe("battle/action", () => {
@@ -29,7 +29,7 @@ describe("battle/action", () => {
   let ailmentSpy: jest.SpyInstance<boolean, [p: Ailment["label"], q: Pokemon]>;
 
   beforeAll(() => {
-    apply({ battle: { hit: "probability" } });
+    apply({ battle: { hit: "probability", sideEffect: "none" } });
   });
 
   beforeEach(() => {
@@ -43,12 +43,10 @@ describe("battle/action", () => {
     probabilitySpy.mockClear();
     rangeSpy.mockClear();
     if (ailmentSpy) ailmentSpy.mockClear();
+    apply({ battle: { hit: "probability", sideEffect: "none" } });
   });
 
   test("通常の攻撃のやりとり", () => {
-    ailmentSpy = jest
-      .spyOn(mockAilment, "mayBeAffected")
-      .mockReturnValue(false);
     let progress: Progress = {
       playerA,
       playerB,
@@ -71,9 +69,6 @@ describe("battle/action", () => {
   });
 
   test("はれ天候で炎と水の威力が変化する", () => {
-    ailmentSpy = jest
-      .spyOn(mockAilment, "mayBeAffected")
-      .mockReturnValue(false);
     let progress: Progress = {
       playerA,
       playerB,
@@ -122,9 +117,6 @@ describe("battle/action", () => {
   });
 
   test("残りHPが0になると戦闘不能になる", () => {
-    ailmentSpy = jest
-      .spyOn(mockAilment, "mayBeAffected")
-      .mockReturnValue(false);
     let progress: Progress = {
       playerA,
       playerB: {
@@ -148,9 +140,6 @@ describe("battle/action", () => {
   });
 
   test("命中不安の技は外れる可能性がある", () => {
-    ailmentSpy = jest
-      .spyOn(mockAilment, "mayBeAffected")
-      .mockReturnValue(false);
     let progress: Progress = {
       playerA: {
         ...playerA,
@@ -551,7 +540,7 @@ describe("battle/action", () => {
   });
 
   test("氷技で凍ることがある", () => {
-    ailmentSpy = jest.spyOn(mockAilment, "mayBeAffected").mockReturnValue(true);
+    apply({ battle: { sideEffect: "always" } });
     let progress: Progress = {
       playerA: {
         ...playerA,
@@ -574,7 +563,7 @@ describe("battle/action", () => {
   });
 
   test("炎技でやけどになることがある", () => {
-    ailmentSpy = jest.spyOn(mockAilment, "mayBeAffected").mockReturnValue(true);
+    apply({ battle: { sideEffect: "always" } });
     let progress: Progress = {
       playerA,
       playerB,
@@ -595,7 +584,7 @@ describe("battle/action", () => {
   });
 
   test("電気技で麻痺になることがある", () => {
-    ailmentSpy = jest.spyOn(mockAilment, "mayBeAffected").mockReturnValue(true);
+    apply({ battle: { sideEffect: "always" } });
     let progress: Progress = {
       playerA: {
         ...playerA,
@@ -616,4 +605,54 @@ describe("battle/action", () => {
       "カメックスは 体がしびれて 動けない！",
     ]);
   });
+
+  // test("どく、やけど、こおりはならないタイプがある", () => {
+  //   let progress: Progress = {
+  //     playerA: {
+  //       ...playerA,
+  //       pokemons: [breloom],
+  //     },
+  //     playerB: {
+  //       ...playerB,
+  //       pokemons: [fushigibana],
+  //     },
+  //     environment: normalEnv,
+  //     log: [],
+  //   };
+  //   progress = runAction(progress, {
+  //     playerA: { type: "fight", index: 1 }, // 毒の粉
+  //     playerB: { type: "fight", index: 0 },
+  //   });
+  //   expect(progress.log.map(toString)).toStrictEqual([
+  //     "フシギバナの タネばくだん！",
+  //     "キノガッサは 12 ダメージ受けた！",
+  //     "キノガッサの どくのこな！",
+  //     "しかし うまくきまらなかった",
+  //   ]);
+  // });
+
+  // test("すでに状態異常になっていると、これ以上はならない", () => {
+  //   let progress: Progress = {
+  //     playerA: {
+  //       ...playerA,
+  //       pokemons: [breloom],
+  //     },
+  //     playerB: {
+  //       ...playerB,
+  //       pokemons: [addAilment(magikarp, "burn")],
+  //     },
+  //     environment: normalEnv,
+  //     log: [],
+  //   };
+  //   progress = runAction(progress, {
+  //     playerA: { type: "fight", index: 1 }, // 毒の粉
+  //     playerB: { type: "fight", index: 0 },
+  //   });
+  //   console.log(progress.log);
+  //   expect(progress.log.map(toString)).toStrictEqual([
+  //     "キノガッサの どくのこな！",
+  //     "しかし うまくきまらなかった",
+  //     "コイキングの はねる！",
+  //   ]);
+  // });
 });

@@ -16,7 +16,7 @@ export const flamethrower: Move = {
   pp: 15,
   accuracy: 100,
   moveType: "special",
-  additional: {
+  sideEffect: {
     ailment: {
       label: "burn",
       percentage: 10,
@@ -32,7 +32,7 @@ export const flareBlitz: Move = {
   accuracy: 100,
   moveType: "physical",
   contact: true,
-  additional: {
+  sideEffect: {
     ailment: {
       label: "burn",
       percentage: 10,
@@ -56,7 +56,7 @@ export const Thunderbolt: Move = {
   pp: 15,
   accuracy: 100,
   moveType: "special",
-  additional: {
+  sideEffect: {
     ailment: {
       label: "paralysis",
       percentage: 10,
@@ -72,7 +72,7 @@ export const voltTackle: Move = {
   accuracy: 100,
   moveType: "physical",
   contact: true,
-  additional: {
+  sideEffect: {
     ailment: {
       label: "paralysis",
       percentage: 10,
@@ -135,7 +135,7 @@ export const iceBeam: Move = {
   pp: 10,
   accuracy: 100,
   moveType: "special",
-  additional: {
+  sideEffect: {
     ailment: {
       label: "freeze",
       percentage: 10,
@@ -160,7 +160,7 @@ export const blizzard: Move = {
   pp: 110,
   accuracy: 70,
   moveType: "special",
-  additional: {
+  sideEffect: {
     ailment: {
       label: "freeze",
       percentage: 10,

@@ -1,4 +1,4 @@
-import { Move } from "@/domain/model/move";
+import { AttackMove, Move } from "@/domain/model/move";
 import { Config, defaultConfig } from "@/domain/config/move";
 import { probability } from "@/utils/random";
 import { ActionCommandSet, Progress } from "@/domain/model/battle";
@@ -8,8 +8,11 @@ import { currentPokemon } from "@/domain/controller/player";
 
 let config = defaultConfig;
 
-export const apply = ({ battle }: { battle: Config }) => {
-  config = battle;
+export const apply = ({ battle }: { battle: Partial<Config> }) => {
+  config = {
+    ...config,
+    ...battle,
+  };
 };
 
 const getConfig = () => config;
@@ -20,6 +23,16 @@ export const isHit = (move: Move) =>
   move.accuracy === 100 ||
   getConfig().hit === "always" ||
   (getConfig().hit === "probability" && probability(move.accuracy / 100));
+
+export const isSideEffectHappen = (move: AttackMove) => {
+  const percentage = move.sideEffect?.ailment
+    ? move.sideEffect.ailment.percentage
+    : 0;
+  return (
+    getConfig().sideEffect === "always" ||
+    (getConfig().sideEffect === "probability" && probability(percentage / 100))
+  );
+};
 
 type MoveElement = { move: Move; isA: boolean; speed: number };
 

@@ -14,7 +14,7 @@ export type AttackMove = {
   moveType: AttackMoveType;
   contact?: boolean;
   priority?: number;
-  additional?: {
+  sideEffect?: {
     ailment?: {
       label: Ailment["label"];
       percentage: number;

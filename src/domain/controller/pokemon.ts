@@ -10,8 +10,7 @@ import {
   isWeatherActive,
 } from "@/domain/controller/environment";
 import { plusMinusNumber as pm } from "@/utils/format";
-import { Ailment } from "@/domain/model/ailment";
-import { initAilment } from "@/domain/controller/ailment";
+import { hasAilment } from "@/domain/controller/ailment";
 
 type CalcParams = {
   baseStats: Statistics;
@@ -24,25 +23,6 @@ type CalcParams = {
 
 export const hasType = (pokemon: Pokemon, type: Type) =>
   pokemon.types.some((t) => t === type);
-
-export const addAilment = (pokemon: Pokemon, ailment?: Ailment["label"]) =>
-  pokemon.condition.ailment
-    ? pokemon
-    : {
-        ...pokemon,
-        condition: { ...pokemon.condition, ailment: initAilment(ailment) },
-      };
-
-export const hasAilment = (pokemon: Pokemon, ailment?: Ailment["label"]) =>
-  ailment ? pokemon.condition.ailment?.label === ailment : !!pokemon.condition;
-
-export const recoverAilment = (pokemon: Pokemon) => ({
-  ...pokemon,
-  condition: {
-    ...pokemon.condition,
-    ailment: undefined,
-  },
-});
 
 const characteristicCorrection = (
   characteristic: Characteristic,

@@ -2,7 +2,7 @@ import { runAction } from "@/domain/controller/battle/action";
 import { passTurn, runPrepare } from "@/domain/controller/battle/turn";
 import { apply } from "@/domain/controller/move";
 import { currentPokemon } from "@/domain/controller/player";
-import { addAilment } from "@/domain/controller/pokemon";
+import { addAilment } from "@/domain/controller/ailment";
 import { Progress } from "@/domain/model/battle";
 import { toString } from "@/domain/model/log";
 import { hail, normalEnv, sandstormMisty } from "__tests__/mock/environment";

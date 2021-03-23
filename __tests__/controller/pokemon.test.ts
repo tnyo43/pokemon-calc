@@ -6,7 +6,6 @@ import {
   updateStatus,
   canMove,
   reducePP,
-  addAilment,
 } from "@/domain/controller/pokemon";
 import {
   damage,
@@ -17,7 +16,7 @@ import {
 } from "__tests__/mock/pokemon";
 import { Pokemon } from "@/domain/model/pokemon";
 import { normalEnv } from "__tests__/mock/environment";
-import { initAilment } from "@/domain/controller/ailment";
+import { initAilment, addAilment } from "@/domain/controller/ailment";
 
 describe("pokemon", () => {
   describe("各ステータスの計算", () => {
