@@ -17,7 +17,7 @@ export type AttackMove = {
   additional?: {
     ailment?: {
       label: Ailment["label"];
-      probability: number;
+      percentage: number;
     };
   };
 };

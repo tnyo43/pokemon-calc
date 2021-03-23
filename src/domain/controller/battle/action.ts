@@ -20,7 +20,7 @@ import {
 } from "@/domain/controller/pokemon";
 import { Player } from "@/domain/model/player";
 import { probability } from "@/utils/random";
-import { pastSleep } from "@/domain/controller/ailment";
+import { mayBeAffected, pastSleep } from "@/domain/controller/ailment";
 
 type Args = {
   attacker: Player;
@@ -71,32 +71,63 @@ const attack = (
 
   if (progress.winner || needToChange(attacker)) return progress;
 
-  let log = progress.log;
-
   if (currentPokemon(defencer).condition.protect) {
-    log = Log.add(log, Log.protectSucceed(currentPokemon(defencer)));
-  } else {
-    const damageResult = damage(
-      move,
-      currentPokemon(attacker),
-      currentPokemon(defencer),
-      environment
-    );
-    defencer = updatePokemon(
-      defencer,
-      beHurt(currentPokemon(defencer), damageResult)
-    );
-    log = Log.add(log, Log.damage(currentPokemon(defencer), damageResult));
+    return {
+      ...progress,
+      log: Log.add(progress.log, Log.protectSucceed(currentPokemon(defencer))),
+    };
   }
 
-  let progResult = {
-    ...progress,
+  let log = progress.log;
+  const damageResult = damage(
+    move,
+    currentPokemon(attacker),
+    currentPokemon(defencer),
+    environment
+  );
+  defencer = updatePokemon(
+    defencer,
+    beHurt(currentPokemon(defencer), damageResult)
+  );
+  log = Log.add(log, Log.damage(currentPokemon(defencer), damageResult));
+
+  let progResult = judge(
+    {
+      ...progress,
+      log,
+      [keys.defencer]: defencer,
+    },
+    keys.defencer
+  );
+
+  defencer = progResult[keys.defencer];
+  log = progResult.log;
+
+  if (currentPokemon(defencer).dying) return progResult;
+
+  if (move.additional) {
+    if (move.additional.ailment) {
+      const { label, percentage } = move.additional.ailment;
+      if (
+        mayBeAffected(label, currentPokemon(defencer)) &&
+        probability(percentage / 100)
+      ) {
+        defencer = updatePokemon(
+          defencer,
+          addAilment(currentPokemon(defencer), label)
+        );
+        log = Log.add(log, Log.ailment(currentPokemon(defencer), label));
+      }
+    }
+  }
+
+  progResult = {
+    ...progResult,
     log,
     [keys.attacker]: attacker,
     [keys.defencer]: defencer,
   };
 
-  progResult = judge(progResult, keys.defencer);
   progResult = judge(progResult, keys.attacker);
   return progResult;
 };

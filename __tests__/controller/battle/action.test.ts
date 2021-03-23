@@ -18,11 +18,15 @@ import {
   magikarp,
   breloom,
 } from "__tests__/mock/pokemon";
+import * as mockAilment from "@/domain/controller/ailment";
 import * as mockRandom from "@/utils/random";
+import { Ailment } from "@/domain/model/ailment";
+import { Pokemon } from "@/domain/model/pokemon";
 
 describe("battle/action", () => {
   let probabilitySpy: jest.SpyInstance<boolean, [p: number]>;
   let rangeSpy: jest.SpyInstance<number, [p: number, q: number, r: number]>;
+  let ailmentSpy: jest.SpyInstance<boolean, [p: Ailment["label"], q: Pokemon]>;
 
   beforeAll(() => {
     apply({ battle: { hit: "probability" } });
@@ -38,9 +42,13 @@ describe("battle/action", () => {
   afterEach(() => {
     probabilitySpy.mockClear();
     rangeSpy.mockClear();
+    if (ailmentSpy) ailmentSpy.mockClear();
   });
 
   test("通常の攻撃のやりとり", () => {
+    ailmentSpy = jest
+      .spyOn(mockAilment, "mayBeAffected")
+      .mockReturnValue(false);
     let progress: Progress = {
       playerA,
       playerB,
@@ -63,6 +71,9 @@ describe("battle/action", () => {
   });
 
   test("はれ天候で炎と水の威力が変化する", () => {
+    ailmentSpy = jest
+      .spyOn(mockAilment, "mayBeAffected")
+      .mockReturnValue(false);
     let progress: Progress = {
       playerA,
       playerB,
@@ -111,6 +122,9 @@ describe("battle/action", () => {
   });
 
   test("残りHPが0になると戦闘不能になる", () => {
+    ailmentSpy = jest
+      .spyOn(mockAilment, "mayBeAffected")
+      .mockReturnValue(false);
     let progress: Progress = {
       playerA,
       playerB: {
@@ -134,6 +148,9 @@ describe("battle/action", () => {
   });
 
   test("命中不安の技は外れる可能性がある", () => {
+    ailmentSpy = jest
+      .spyOn(mockAilment, "mayBeAffected")
+      .mockReturnValue(false);
     let progress: Progress = {
       playerA: {
         ...playerA,
@@ -530,6 +547,73 @@ describe("battle/action", () => {
       "satoshiは ピカチュウを引っ込めて ソルロックを繰り出した！",
       "コイキングは 目をさました！",
       "コイキングの はねる！",
+    ]);
+  });
+
+  test("氷技で凍ることがある", () => {
+    ailmentSpy = jest.spyOn(mockAilment, "mayBeAffected").mockReturnValue(true);
+    let progress: Progress = {
+      playerA: {
+        ...playerA,
+        pokemons: [weavile],
+      },
+      playerB,
+      environment: normalEnv,
+      log: [],
+    };
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 2 }, // ふぶき
+      playerB: { type: "fight", index: 0 },
+    });
+    expect(progress.log.map(toString)).toStrictEqual([
+      "マニューラの ふぶき！",
+      "カメックスは 2 ダメージ受けた！",
+      "カメックスは 凍りついた！",
+      "カメックスは 凍ってしまって 動けない！",
+    ]);
+  });
+
+  test("炎技でやけどになることがある", () => {
+    ailmentSpy = jest.spyOn(mockAilment, "mayBeAffected").mockReturnValue(true);
+    let progress: Progress = {
+      playerA,
+      playerB,
+      environment: normalEnv,
+      log: [],
+    };
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 0 }, // ふぶき
+      playerB: { type: "fight", index: 0 },
+    });
+    expect(progress.log.map(toString)).toStrictEqual([
+      "リザードンの かえんしょうしゃ！",
+      "カメックスは 31 ダメージ受けた！",
+      "カメックスは やけどを 負った！",
+      "カメックスの なみのり！",
+      "リザードンは 122 ダメージ受けた！",
+    ]);
+  });
+
+  test("電気技で麻痺になることがある", () => {
+    ailmentSpy = jest.spyOn(mockAilment, "mayBeAffected").mockReturnValue(true);
+    let progress: Progress = {
+      playerA: {
+        ...playerA,
+        pokemons: [pikachu],
+      },
+      playerB,
+      environment: normalEnv,
+      log: [],
+    };
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 0 }, // 10まんボルト
+      playerB: { type: "fight", index: 0 },
+    });
+    expect(progress.log.map(toString)).toStrictEqual([
+      "ピカチュウの 10まんボルト！",
+      "カメックスは 62 ダメージ受けた！",
+      "カメックスは まひして 技が でにくくなった！",
+      "カメックスは 体がしびれて 動けない！",
     ]);
   });
 });

@@ -16,6 +16,12 @@ export const flamethrower: Move = {
   pp: 15,
   accuracy: 100,
   moveType: "special",
+  additional: {
+    ailment: {
+      label: "burn",
+      percentage: 10,
+    },
+  },
 };
 
 export const flareBlitz: Move = {
@@ -26,6 +32,12 @@ export const flareBlitz: Move = {
   accuracy: 100,
   moveType: "physical",
   contact: true,
+  additional: {
+    ailment: {
+      label: "burn",
+      percentage: 10,
+    },
+  },
 };
 
 export const surf: Move = {
@@ -44,6 +56,12 @@ export const Thunderbolt: Move = {
   pp: 15,
   accuracy: 100,
   moveType: "special",
+  additional: {
+    ailment: {
+      label: "paralysis",
+      percentage: 10,
+    },
+  },
 };
 
 export const voltTackle: Move = {
@@ -54,6 +72,12 @@ export const voltTackle: Move = {
   accuracy: 100,
   moveType: "physical",
   contact: true,
+  additional: {
+    ailment: {
+      label: "paralysis",
+      percentage: 10,
+    },
+  },
 };
 
 export const quickAttack: Move = {
@@ -111,6 +135,12 @@ export const iceBeam: Move = {
   pp: 10,
   accuracy: 100,
   moveType: "special",
+  additional: {
+    ailment: {
+      label: "freeze",
+      percentage: 10,
+    },
+  },
 };
 
 export const iceShard: Move = {
@@ -120,7 +150,6 @@ export const iceShard: Move = {
   pp: 30,
   accuracy: 100,
   moveType: "physical",
-
   priority: 1,
 };
 
@@ -131,6 +160,12 @@ export const blizzard: Move = {
   pp: 110,
   accuracy: 70,
   moveType: "special",
+  additional: {
+    ailment: {
+      label: "freeze",
+      percentage: 10,
+    },
+  },
 };
 
 export const darkPulse: Move = {
