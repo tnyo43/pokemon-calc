@@ -6,7 +6,7 @@ import { addAilment } from "@/domain/controller/ailment";
 import { Progress } from "@/domain/model/battle";
 import { toString } from "@/domain/model/log";
 import { hail, normalEnv, sandstormMisty } from "__tests__/mock/environment";
-import { playerA, playerB } from "__tests__/mock/player";
+import { player, playerA, playerB } from "__tests__/mock/player";
 import {
   damagedPokemon,
   kamex,
@@ -16,7 +16,7 @@ import {
 
 describe("battle/turn", () => {
   beforeAll(() => {
-    apply({ battle: { hit: "always" } });
+    apply({ battle: { hit: "always", sideEffect: "probability" } });
   });
 
   test("すなあらしのダメージとターン経過", () => {
@@ -44,10 +44,7 @@ describe("battle/turn", () => {
 
   test("天候ログでも瀕死になることがある", () => {
     let progress: Progress = {
-      playerA: {
-        ...playerA,
-        pokemons: [damagedPokemon(rizadon, 1), pikachu],
-      },
+      playerA: player([damagedPokemon(rizadon, 1), pikachu]),
       playerB,
       environment: hail,
       log: [],
@@ -70,10 +67,7 @@ describe("battle/turn", () => {
   test("場のポケモンが戦闘不能になったら次のポケモンを出す", () => {
     let progress: Progress = {
       playerA,
-      playerB: {
-        ...playerB,
-        pokemons: [damagedPokemon(kamex, 1), rizadon],
-      },
+      playerB: player([damagedPokemon(kamex, 1), rizadon], "shigeru"),
       environment: normalEnv,
       log: [],
     };
@@ -98,10 +92,7 @@ describe("battle/turn", () => {
   test("一方の出せるポケモンがいなくなったらおしまい", () => {
     let progress: Progress = {
       playerA,
-      playerB: {
-        ...playerB,
-        pokemons: [damagedPokemon(kamex, 1)],
-      },
+      playerB: player([damagedPokemon(kamex, 1)], "shigeru"),
       environment: normalEnv,
       log: [],
     };
@@ -119,14 +110,8 @@ describe("battle/turn", () => {
 
   test("やけどと毒になると継続的にダメージを受ける", () => {
     let progress: Progress = {
-      playerA: {
-        ...playerA,
-        pokemons: [addAilment(pikachu, "poison")],
-      },
-      playerB: {
-        ...playerB,
-        pokemons: [addAilment(kamex, "burn")],
-      },
+      playerA: player([addAilment(pikachu, "poison")]),
+      playerB: player([addAilment(kamex, "burn")]),
       environment: normalEnv,
       log: [],
     };
@@ -146,10 +131,7 @@ describe("battle/turn", () => {
 
   test("もうどくになるとダメージも増える", () => {
     let progress: Progress = {
-      playerA: {
-        ...playerA,
-        pokemons: [addAilment(pikachu, "bad poison")],
-      },
+      playerA: player([addAilment(pikachu, "bad poison")]),
       playerB,
       environment: normalEnv,
       log: [],
