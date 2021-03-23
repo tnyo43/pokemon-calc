@@ -21,7 +21,9 @@ export const addAilment = (pokemon: Pokemon, ailment?: Ailment["label"]) =>
       };
 
 export const hasAilment = (pokemon: Pokemon, ailment?: Ailment["label"]) =>
-  ailment ? pokemon.condition.ailment?.label === ailment : false;
+  ailment
+    ? pokemon.condition.ailment?.label === ailment
+    : !!pokemon.condition.ailment;
 
 export const recoverAilment = (pokemon: Pokemon) => ({
   ...pokemon,

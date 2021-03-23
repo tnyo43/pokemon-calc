@@ -606,53 +606,52 @@ describe("battle/action", () => {
     ]);
   });
 
-  // test("どく、やけど、こおりはならないタイプがある", () => {
-  //   let progress: Progress = {
-  //     playerA: {
-  //       ...playerA,
-  //       pokemons: [breloom],
-  //     },
-  //     playerB: {
-  //       ...playerB,
-  //       pokemons: [fushigibana],
-  //     },
-  //     environment: normalEnv,
-  //     log: [],
-  //   };
-  //   progress = runAction(progress, {
-  //     playerA: { type: "fight", index: 1 }, // 毒の粉
-  //     playerB: { type: "fight", index: 0 },
-  //   });
-  //   expect(progress.log.map(toString)).toStrictEqual([
-  //     "フシギバナの タネばくだん！",
-  //     "キノガッサは 12 ダメージ受けた！",
-  //     "キノガッサの どくのこな！",
-  //     "しかし うまくきまらなかった",
-  //   ]);
-  // });
+  test("どく、やけど、こおりはならないタイプがある", () => {
+    let progress: Progress = {
+      playerA: {
+        ...playerA,
+        pokemons: [breloom],
+      },
+      playerB: {
+        ...playerB,
+        pokemons: [fushigibana],
+      },
+      environment: normalEnv,
+      log: [],
+    };
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 1 }, // 毒の粉
+      playerB: { type: "fight", index: 0 },
+    });
+    expect(progress.log.map(toString)).toStrictEqual([
+      "フシギバナの タネばくだん！",
+      "キノガッサは 12 ダメージ受けた！",
+      "キノガッサの どくのこな！",
+      "しかし うまくきまらなかった",
+    ]);
+  });
 
-  // test("すでに状態異常になっていると、これ以上はならない", () => {
-  //   let progress: Progress = {
-  //     playerA: {
-  //       ...playerA,
-  //       pokemons: [breloom],
-  //     },
-  //     playerB: {
-  //       ...playerB,
-  //       pokemons: [addAilment(magikarp, "burn")],
-  //     },
-  //     environment: normalEnv,
-  //     log: [],
-  //   };
-  //   progress = runAction(progress, {
-  //     playerA: { type: "fight", index: 1 }, // 毒の粉
-  //     playerB: { type: "fight", index: 0 },
-  //   });
-  //   console.log(progress.log);
-  //   expect(progress.log.map(toString)).toStrictEqual([
-  //     "キノガッサの どくのこな！",
-  //     "しかし うまくきまらなかった",
-  //     "コイキングの はねる！",
-  //   ]);
-  // });
+  test("すでに状態異常になっていると、これ以上はならない", () => {
+    let progress: Progress = {
+      playerA: {
+        ...playerA,
+        pokemons: [breloom],
+      },
+      playerB: {
+        ...playerB,
+        pokemons: [addAilment(magikarp, "burn")],
+      },
+      environment: normalEnv,
+      log: [],
+    };
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 1 }, // 毒の粉
+      playerB: { type: "fight", index: 0 },
+    });
+    expect(progress.log.map(toString)).toStrictEqual([
+      "キノガッサの どくのこな！",
+      "しかし うまくきまらなかった",
+      "コイキングの はねる！",
+    ]);
+  });
 });

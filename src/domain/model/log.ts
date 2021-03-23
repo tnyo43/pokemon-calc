@@ -18,6 +18,7 @@ export type Log =
       ailment: "poison" | "bad poison" | "burn";
     }
   | { label: "miss"; name: string }
+  | { label: "failed" }
   | {
       label: "cannotMove";
       name: string;
@@ -76,6 +77,9 @@ const toStringAilmentDamage = ({
 
 const toStringMiss = ({ name }: { name: string }) =>
   `${name}には 当たらなかった！`;
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+const toStringFailed = (_: {}) => "しかし うまくきまらなかった";
 
 const toStringCannotMove = ({
   name,
@@ -203,6 +207,8 @@ export const toString = (log: Log): string => {
       return toStringAilmentDamage(log);
     case "miss":
       return toStringMiss(log);
+    case "failed":
+      return toStringFailed(log);
     case "cannotMove":
       return toStringCannotMove(log);
     case "recover":

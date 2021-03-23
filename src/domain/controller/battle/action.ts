@@ -192,7 +192,7 @@ const helping = (
         addAilment(currentPokemon(defencer), move.ailment)
       );
     } else {
-      // log = Log.add(log, Log.failed());
+      log = Log.add(log, Log.failed());
     }
   }
 
