@@ -1,5 +1,5 @@
 import { Weather, Terrain, Environment } from "@/domain/model/environment";
-import { hasType } from "@/domain/controller/pokemon";
+import { hasType } from "@/domain/controller/type";
 import { Pokemon } from "@/domain/model/pokemon";
 
 export const overrideWeather = (

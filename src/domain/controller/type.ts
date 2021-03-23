@@ -1,4 +1,5 @@
 import { Type } from "@/domain/model/type";
+import { Pokemon } from "@/domain/model/pokemon";
 
 type MoveEffectiveness = {
   big: Type[];
@@ -104,3 +105,6 @@ export const compatibility = (
   });
   return compat;
 };
+
+export const hasType = (pokemon: Pokemon, type: Type) =>
+  pokemon.types.some((t) => t === type);

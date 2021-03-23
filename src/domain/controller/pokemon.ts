@@ -2,8 +2,7 @@ import { Characteristic } from "@/domain/model/characteristic";
 import { AttackMove, BuffStatus, Move } from "@/domain/model/move";
 import { PokedexInfo, Pokemon } from "@/domain/model/pokemon";
 import { Statistics, StatisticsType, Status } from "@/domain/model/stats";
-import { Type } from "@/domain/model/type";
-import { compatibility } from "@/domain/controller/type";
+import { compatibility, hasType } from "@/domain/controller/type";
 import { Environment } from "@/domain/model/environment";
 import {
   isTerrainActive,
@@ -20,9 +19,6 @@ type CalcParams = {
   characteristic: Characteristic;
   status: Status;
 };
-
-export const hasType = (pokemon: Pokemon, type: Type) =>
-  pokemon.types.some((t) => t === type);
 
 const characteristicCorrection = (
   characteristic: Characteristic,

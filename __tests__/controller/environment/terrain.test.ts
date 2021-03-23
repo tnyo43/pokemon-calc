@@ -3,11 +3,11 @@ import {
   updateEnvironment,
   isTerrainActive,
 } from "@/domain/controller/environment";
+import { Environment } from "@/domain/model/environment";
 import {
   grassy,
   normalEnv,
   psychic,
-  rainElectric,
   sandstormMisty,
 } from "__tests__/mock/environment";
 import {
@@ -19,11 +19,14 @@ import {
 } from "__tests__/mock/pokemon";
 
 describe("environment/terrain", () => {
+  const electric: Environment = {
+    weather: "none",
+    terrain: { value: "electric", count: 5 },
+  };
+
   test("上書きできる", () => {
     expect(overrideTerrain(normalEnv, "grassy")).toStrictEqual(grassy);
-    expect(
-      isTerrainActive(overrideTerrain(grassy, "electric"), "electric")
-    ).toBe(true);
+    expect(overrideTerrain(grassy, "electric")).toStrictEqual(electric);
     expect(
       isTerrainActive(overrideTerrain(sandstormMisty, "psychic"), "psychic")
     ).toBe(true);
@@ -41,7 +44,7 @@ describe("environment/terrain", () => {
   describe("エレキフィールド", () => {
     test("でんきタイプの技の威力が1.3倍", () => {
       expect(damage(0, pikachu, kamex, normalEnv)).toBe(62);
-      expect(damage(0, pikachu, kamex, rainElectric)).toBe(80);
+      expect(damage(0, pikachu, kamex, electric)).toBe(80);
     });
   });
 

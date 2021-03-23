@@ -74,8 +74,6 @@ const attack = (
   { attacker, defencer, keys }: Args,
   move: AttackMove
 ): Progress => {
-  const { environment } = progress;
-
   if (progress.winner || needToChange(attacker)) return progress;
 
   if (currentPokemon(defencer).condition.protect) {
@@ -90,7 +88,7 @@ const attack = (
     move,
     currentPokemon(attacker),
     currentPokemon(defencer),
-    environment
+    progress.environment
   );
   defencer = updatePokemon(
     defencer,
@@ -115,7 +113,9 @@ const attack = (
   if (move.sideEffect && isSideEffectHappen(move)) {
     if (move.sideEffect.ailment) {
       const { label } = move.sideEffect.ailment;
-      if (mayBeAffected(label, currentPokemon(defencer).types)) {
+      if (
+        mayBeAffected(label, currentPokemon(defencer), progress.environment)
+      ) {
         defencer = updatePokemon(
           defencer,
           addAilment(currentPokemon(defencer), label)
@@ -184,7 +184,11 @@ const helping = (
   if (move.ailment) {
     if (
       !hasAilment(currentPokemon(defencer)) &&
-      mayBeAffected(move.ailment, currentPokemon(defencer).types)
+      mayBeAffected(
+        move.ailment,
+        currentPokemon(defencer),
+        progress.environment
+      )
     ) {
       log = Log.add(log, Log.ailment(currentPokemon(defencer), move.ailment));
       defencer = updatePokemon(
