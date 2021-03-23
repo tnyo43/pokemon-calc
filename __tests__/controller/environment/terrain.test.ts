@@ -2,6 +2,8 @@ import {
   overrideTerrain,
   updateEnvironment,
   isTerrainActive,
+  affectedEnvironment,
+  terrainRecover,
 } from "@/domain/controller/environment";
 import { Environment } from "@/domain/model/environment";
 import {
@@ -32,6 +34,16 @@ describe("environment/terrain", () => {
     ).toBe(true);
   });
 
+  test("浮いているとフィールドの影響を受けない", () => {
+    expect(affectedEnvironment(sandstormMisty, rizadon)).toStrictEqual({
+      weather: { value: "sandstorm", count: 5 },
+      terrain: "none",
+    });
+    expect(affectedEnvironment(sandstormMisty, pikachu)).toStrictEqual(
+      sandstormMisty
+    );
+  });
+
   test("5ターン続く", () => {
     let environment = overrideTerrain(normalEnv, "grassy");
     expect(isTerrainActive(environment, "grassy")).toBe(true);
@@ -59,6 +71,12 @@ describe("environment/terrain", () => {
     test("草タイプの技の威力が1.3倍", () => {
       expect(damage(1, solrock, rizadon, normalEnv)).toBe(24);
       expect(damage(1, solrock, rizadon, psychic)).toBe(30);
+    });
+
+    test("ダメージを回復する", () => {
+      expect(terrainRecover(grassy, pikachu)).not.toBe(0);
+      expect(terrainRecover(grassy, rizadon)).toBe(0);
+      expect(terrainRecover(electric, pikachu)).toBe(0);
     });
   });
 

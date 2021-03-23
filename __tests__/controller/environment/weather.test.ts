@@ -1,7 +1,7 @@
 import {
   overrideWeather,
   updateEnvironment,
-  damage as weatherDamage,
+  weatherDamage,
   isWeatherActive,
 } from "@/domain/controller/environment";
 import {

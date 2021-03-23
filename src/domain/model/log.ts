@@ -9,6 +9,7 @@ import { Ailment } from "@/domain/model/ailment";
 export type Log =
   | { label: "action"; name: string; move: string }
   | { label: "damage"; name: string; damage: number }
+  | { label: "recover"; name: string }
   | { label: "protect"; name: string }
   | { label: "protect succeed"; name: string }
   | { label: "ailment"; name: string; ailment: Ailment["label"] }
@@ -24,7 +25,7 @@ export type Log =
       name: string;
       cause: "paralysis" | "freeze" | "sleep";
     }
-  | { label: "recover"; name: string; cause: "freeze" | "sleep" }
+  | { label: "recover ailment"; name: string; cause: "freeze" | "sleep" }
   | { label: "status"; name: string; param: StatusType; diff: number }
   | { label: "change"; player: string; pokemonFrom: string; pokemonTo: string }
   | { label: "weather"; weather: Weather; isEnd: boolean }
@@ -39,6 +40,9 @@ const toStringAction = ({ name, move }: { name: string; move: string }) =>
 
 const toStringDamage = ({ name, damage }: { name: string; damage: number }) =>
   `${name}は ${damage} ダメージ受けた！`;
+
+const toStringRecover = ({ name }: { name: string }) =>
+  `${name}の 体力が 回復した！`;
 
 const toStringProtect = ({ name }: { name: string }) =>
   `${name}は 守りの 体勢に 入った！`;
@@ -94,7 +98,7 @@ const toStringCannotMove = ({
         cause === "paralysis" ? "体がしびれて" : "凍ってしまって"
       } 動けない！`;
 
-const toStringRecover = ({
+const toStringRecoverAilment = ({
   name,
   cause,
 }: {
@@ -197,6 +201,8 @@ export const toString = (log: Log): string => {
       return toStringAction(log);
     case "damage":
       return toStringDamage(log);
+    case "recover":
+      return toStringRecover(log);
     case "protect":
       return toStringProtect(log);
     case "protect succeed":
@@ -211,8 +217,8 @@ export const toString = (log: Log): string => {
       return toStringFailed(log);
     case "cannotMove":
       return toStringCannotMove(log);
-    case "recover":
-      return toStringRecover(log);
+    case "recover ailment":
+      return toStringRecoverAilment(log);
     case "status":
       return toStringStatus(log);
     case "change":

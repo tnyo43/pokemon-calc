@@ -223,6 +223,9 @@ export const canMove = (pokemon: Pokemon, index: number) =>
 export const beHurt = (pokemon: Pokemon, damage: number) =>
   updateStatus(pokemon, { hp: -damage });
 
+export const recover = (pokemon: Pokemon, rec: number) =>
+  updateStatus(pokemon, { hp: rec });
+
 export const pokemon = (
   pokeInfo: PokedexInfo,
   level: number,

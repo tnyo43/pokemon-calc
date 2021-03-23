@@ -257,7 +257,7 @@ const cannotMoveByAilment = (
       );
       log = Log.add(
         progress.log,
-        Log.recover(currentPokemon(attacker), "freeze")
+        Log.recoverAilment(currentPokemon(attacker), "freeze")
       );
     }
   }
@@ -278,7 +278,7 @@ const cannotMoveByAilment = (
     } else {
       log = Log.add(
         progress.log,
-        Log.recover(currentPokemon(attacker), "sleep")
+        Log.recoverAilment(currentPokemon(attacker), "sleep")
       );
     }
   }

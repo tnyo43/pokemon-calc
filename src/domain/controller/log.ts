@@ -27,6 +27,11 @@ export const damage = (pokemon: Pokemon, damage: number): Log => ({
   damage,
 });
 
+export const recover = (pokemon: Pokemon): Log => ({
+  label: "recover",
+  name: pokemon.name,
+});
+
 export const protect = (pokemon: Pokemon): Log => ({
   label: "protect",
   name: pokemon.name,
@@ -69,8 +74,11 @@ export const cannotMove = (
   cause,
 });
 
-export const recover = (pokemon: Pokemon, cause: "freeze" | "sleep"): Log => ({
-  label: "recover",
+export const recoverAilment = (
+  pokemon: Pokemon,
+  cause: "freeze" | "sleep"
+): Log => ({
+  label: "recover ailment",
   name: pokemon.name,
   cause,
 });

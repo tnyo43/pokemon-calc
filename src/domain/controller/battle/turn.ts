@@ -1,8 +1,9 @@
 import { PlayerKey, PrepareCommandSet, Progress } from "@/domain/model/battle";
-import { beHurt, updateStatus } from "@/domain/controller/pokemon";
+import { beHurt, recover, updateStatus } from "@/domain/controller/pokemon";
 import {
+  terrainRecover,
   updateEnvironment,
-  damage as weatherDamage,
+  weatherDamage,
 } from "@/domain/controller/environment";
 import * as Log from "@/domain/controller/log";
 import { Log as LogType } from "@/domain/model/log";
@@ -51,11 +52,35 @@ const passTurnEnvironment = (progress: Progress): Progress => {
     };
   };
 
+  const recoverByTerrain = (
+    progress: Progress,
+    playerKey: PlayerKey
+  ): Progress => {
+    let pokemon = currentPokemon(progress[playerKey]);
+    const recovr = terrainRecover(nextEnvironment, pokemon);
+    if (recovr === 0 || pokemon.status.hp === pokemon.basicValue.hp) {
+      return progress;
+    }
+    let log = progress.log;
+    if (!pokemon.dying && nextEnvironment.terrain !== "none") {
+      pokemon = recover(pokemon, recovr);
+      log = Log.add(log, Log.recover(pokemon));
+    }
+    return {
+      ...progress,
+      log,
+      [playerKey]: updatePokemon(progress[playerKey], pokemon),
+    };
+  };
+
   const [first, second]: PlayerKey[] = order(progress);
   progResult = beHurtByWeather(progResult, first);
   progResult = judge(progResult, first);
   progResult = beHurtByWeather(progResult, second);
   progResult = judge(progResult, second);
+
+  progResult = recoverByTerrain(progResult, first);
+  progResult = recoverByTerrain(progResult, second);
 
   return {
     ...progResult,
