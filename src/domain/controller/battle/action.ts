@@ -4,6 +4,7 @@ import { judge, order } from "@/domain/controller/battle/utils";
 import {
   isHit,
   isSideEffectHappen,
+  isSuccessMove,
   sortedMoves,
 } from "@/domain/controller/move";
 import { AttackMove, HelpingMove, Move } from "@/domain/model/move";
@@ -74,8 +75,6 @@ const attack = (
   { attacker, defencer, keys }: Args,
   move: AttackMove
 ): Progress => {
-  const { environment } = progress;
-
   if (progress.winner || needToChange(attacker)) return progress;
 
   if (currentPokemon(defencer).condition.protect) {
@@ -90,7 +89,7 @@ const attack = (
     move,
     currentPokemon(attacker),
     currentPokemon(defencer),
-    environment
+    progress.environment
   );
   defencer = updatePokemon(
     defencer,
@@ -115,7 +114,9 @@ const attack = (
   if (move.sideEffect && isSideEffectHappen(move)) {
     if (move.sideEffect.ailment) {
       const { label } = move.sideEffect.ailment;
-      if (mayBeAffected(label, currentPokemon(defencer).types)) {
+      if (
+        mayBeAffected(label, currentPokemon(defencer), progress.environment)
+      ) {
         defencer = updatePokemon(
           defencer,
           addAilment(currentPokemon(defencer), label)
@@ -184,7 +185,11 @@ const helping = (
   if (move.ailment) {
     if (
       !hasAilment(currentPokemon(defencer)) &&
-      mayBeAffected(move.ailment, currentPokemon(defencer).types)
+      mayBeAffected(
+        move.ailment,
+        currentPokemon(defencer),
+        progress.environment
+      )
     ) {
       log = Log.add(log, Log.ailment(currentPokemon(defencer), move.ailment));
       defencer = updatePokemon(
@@ -253,7 +258,7 @@ const cannotMoveByAilment = (
       );
       log = Log.add(
         progress.log,
-        Log.recover(currentPokemon(attacker), "freeze")
+        Log.recoverAilment(currentPokemon(attacker), "freeze")
       );
     }
   }
@@ -274,7 +279,7 @@ const cannotMoveByAilment = (
     } else {
       log = Log.add(
         progress.log,
-        Log.recover(currentPokemon(attacker), "sleep")
+        Log.recoverAilment(currentPokemon(attacker), "sleep")
       );
     }
   }
@@ -328,7 +333,14 @@ const action = (
     log: Log.add(progress.log, Log.action(currentPokemon(args.attacker), move)),
   };
 
-  if (!isHit(move)) {
+  if (
+    !isSuccessMove(move, currentPokemon(args.attacker), progress.environment)
+  ) {
+    progress = {
+      ...progress,
+      log: Log.add(progress.log, Log.failed()),
+    };
+  } else if (!isHit(move)) {
     progress = {
       ...progress,
       log: Log.add(progress.log, Log.miss(currentPokemon(args.defencer))),

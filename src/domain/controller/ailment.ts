@@ -1,7 +1,12 @@
 import { Ailment } from "@/domain/model/ailment";
 import { range } from "@/utils/random";
 import { Pokemon } from "@/domain/model/pokemon";
-import { Type } from "@/domain/model/type";
+import { hasType } from "@/domain/controller/type";
+import {
+  isTerrainActive,
+  isWeatherActive,
+} from "@/domain/controller/environment";
+import { Environment } from "@/domain/model/environment";
 
 export const initAilment = (label?: Ailment["label"]): Ailment | undefined =>
   !label
@@ -49,8 +54,19 @@ export const pastSleep = (pokemon: Pokemon): Pokemon => {
   };
 };
 
-export const mayBeAffected = (ailment: Ailment["label"], types: Type[]) =>
-  types.every(
+export const mayBeAffected = (
+  ailment: Ailment["label"],
+  pokemon: Pokemon,
+  environment: Environment
+) =>
+  !(!hasType(pokemon, "flying") && isTerrainActive(environment, "psychic")) &&
+  !(
+    !hasType(pokemon, "flying") &&
+    isTerrainActive(environment, "electric") &&
+    ailment === "sleep"
+  ) &&
+  !(isWeatherActive(environment, "sunlight") && ailment === "freeze") &&
+  pokemon.types.every(
     (typ) =>
       !(
         ((ailment === "poison" || ailment === "bad poison") &&

@@ -1,5 +1,5 @@
 import { Weather, Terrain, Environment } from "@/domain/model/environment";
-import { hasType } from "@/domain/controller/pokemon";
+import { hasType } from "@/domain/controller/type";
 import { Pokemon } from "@/domain/model/pokemon";
 
 export const overrideWeather = (
@@ -38,13 +38,24 @@ export const updateEnvironment = (env: Environment): Environment => {
   };
 };
 
-export const isTerrainActive = (env: Environment, terrain: Terrain) =>
-  env.terrain !== "none" && env.terrain.value === terrain;
+export const isTerrainActive = (environment: Environment, terrain: Terrain) =>
+  environment.terrain !== "none" && environment.terrain.value === terrain;
 
-export const isWeatherActive = (env: Environment, weather: Weather) =>
-  env.weather !== "none" && env.weather.value === weather;
+export const isWeatherActive = (environment: Environment, weather: Weather) =>
+  environment.weather !== "none" && environment.weather.value === weather;
 
-export const damage = (environment: Environment, pokemon: Pokemon) =>
+export const affectedEnvironment = (
+  environment: Environment,
+  pokemon: Pokemon
+): Environment =>
+  hasType(pokemon, "flying")
+    ? {
+        ...environment,
+        terrain: "none",
+      }
+    : environment;
+
+export const weatherDamage = (environment: Environment, pokemon: Pokemon) =>
   (isWeatherActive(environment, "sandstorm") &&
     !(
       hasType(pokemon, "rock") ||
@@ -52,5 +63,10 @@ export const damage = (environment: Environment, pokemon: Pokemon) =>
       hasType(pokemon, "steel")
     )) ||
   (isWeatherActive(environment, "hail") && !hasType(pokemon, "ice"))
+    ? Math.floor(pokemon.basicValue.hp / 16)
+    : 0;
+
+export const terrainRecover = (environment: Environment, pokemon: Pokemon) =>
+  isTerrainActive(affectedEnvironment(environment, pokemon), "grassy")
     ? Math.floor(pokemon.basicValue.hp / 16)
     : 0;

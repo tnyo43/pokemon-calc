@@ -5,7 +5,12 @@ import { currentPokemon } from "@/domain/controller/player";
 import { addAilment } from "@/domain/controller/ailment";
 import { Progress } from "@/domain/model/battle";
 import { toString } from "@/domain/model/log";
-import { hail, normalEnv, sandstormMisty } from "__tests__/mock/environment";
+import {
+  grassy,
+  hail,
+  normalEnv,
+  sandstormMisty,
+} from "__tests__/mock/environment";
 import { player, playerA, playerB } from "__tests__/mock/player";
 import {
   damagedPokemon,
@@ -38,6 +43,26 @@ describe("battle/turn", () => {
       "砂あらしが ふきあれる",
       "砂あらしが リザードンを おそう！",
       "砂あらしが カメックスを おそう！",
+      "",
+    ]);
+  });
+
+  test("グラスフィールドの回復とターン経過", () => {
+    let progress: Progress = {
+      playerA: player([damagedPokemon(pikachu, 1)]),
+      playerB,
+      environment: grassy,
+      log: [],
+    };
+
+    progress = passTurn(progress);
+    expect(currentPokemon(progress.playerA).status.hp).toBe(7);
+    expect(progress.environment).toStrictEqual({
+      weather: "none",
+      terrain: { value: "grassy", count: 4 },
+    });
+    expect(progress.log.map(toString)).toStrictEqual([
+      "ピカチュウの 体力が 回復した！",
       "",
     ]);
   });
