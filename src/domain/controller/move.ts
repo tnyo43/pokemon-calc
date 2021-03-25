@@ -5,6 +5,12 @@ import { ActionCommandSet, Progress } from "@/domain/model/battle";
 import { Player } from "@/domain/model/player";
 import { speed as getSpeed } from "@/domain/controller/pokemon";
 import { currentPokemon } from "@/domain/controller/player";
+import {
+  affectedEnvironment,
+  isTerrainActive,
+} from "@/domain/controller/environment";
+import { Pokemon } from "@/domain/model/pokemon";
+import { Environment } from "@/domain/model/environment";
 
 let config = defaultConfig;
 
@@ -65,3 +71,15 @@ export const sortedMoves = (
 
   return moves.sort((m1, m2) => m2.speed - m1.speed);
 };
+
+export const isSuccessMove = (
+  move: Move,
+  pokemon: Pokemon,
+  environment: Environment
+) =>
+  !(
+    move.priority &&
+    move.priority > 0 &&
+    isTerrainActive(affectedEnvironment(environment, pokemon), "psychic") &&
+    (move.moveType !== "helping" || move.statusDiff?.opponent || move.ailment)
+  );

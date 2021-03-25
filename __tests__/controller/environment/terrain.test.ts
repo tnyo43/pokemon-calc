@@ -5,6 +5,7 @@ import {
   affectedEnvironment,
   terrainRecover,
 } from "@/domain/controller/environment";
+import { isSuccessMove } from "@/domain/controller/move";
 import { Environment } from "@/domain/model/environment";
 import {
   grassy,
@@ -12,6 +13,7 @@ import {
   psychic,
   sandstormMisty,
 } from "__tests__/mock/environment";
+import { protect, quickAttack } from "__tests__/mock/moves";
 import {
   pikachu,
   kamex,
@@ -64,6 +66,12 @@ describe("environment/terrain", () => {
     test("エスパータイプの技の威力が1.3倍", () => {
       expect(damage(1, solrock, rizadon, normalEnv)).toBe(24);
       expect(damage(1, solrock, rizadon, psychic)).toBe(30);
+    });
+
+    test("相手に影響を及ぼす先制技が失敗する", () => {
+      expect(isSuccessMove(quickAttack, pikachu, psychic)).toBe(false);
+      expect(isSuccessMove(quickAttack, rizadon, psychic)).toBe(true);
+      expect(isSuccessMove(protect, pikachu, psychic)).toBe(true);
     });
   });
 

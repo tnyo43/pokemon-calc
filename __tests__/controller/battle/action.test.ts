@@ -5,7 +5,7 @@ import { currentPokemon } from "@/domain/controller/player";
 import { speed } from "@/domain/controller/pokemon";
 import { Progress } from "@/domain/model/battle";
 import { toString } from "@/domain/model/log";
-import { hail, normalEnv, sunlight } from "__tests__/mock/environment";
+import { hail, normalEnv, psychic, sunlight } from "__tests__/mock/environment";
 import { player, playerA, playerB } from "__tests__/mock/player";
 import {
   kamex,
@@ -305,5 +305,24 @@ describe("battle/action", () => {
     expect(currentPokemon(progress.playerB).condition.ailment?.label).toBe(
       "sleep"
     );
+  });
+
+  describe("失敗する技がある", () => {
+    let progress: Progress = {
+      playerA: player([pikachu]),
+      playerB,
+      environment: psychic,
+      log: [],
+    };
+    progress = runAction(progress, {
+      playerA: { type: "fight", index: 2 },
+      playerB: { type: "fight", index: 0 },
+    });
+    expect(progress.log.map(toString)).toStrictEqual([
+      "ピカチュウの でんこうせっか！",
+      "しかし うまくきまらなかった",
+      "カメックスの なみのり！",
+      "ピカチュウは 91 ダメージ受けた！",
+    ]);
   });
 });
