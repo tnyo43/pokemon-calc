@@ -1,6 +1,6 @@
 import { Player } from "@/domain/model/player";
 import { Pokemon } from "@/domain/model/pokemon";
-import { Config, defaultConfig } from "@/domain/config/player";
+import { Config, defaultConfig } from "@/config/player";
 import { displayStatus } from "@/domain/controller/pokemon";
 
 let config = defaultConfig;

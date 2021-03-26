@@ -1,6 +1,6 @@
 import { runAction } from "@/domain/controller/battle/action";
 import { passTurn, runPrepare } from "@/domain/controller/battle/turn";
-import { apply } from "@/domain/controller/move";
+import { applySub } from "@/domain/controller/move";
 import { currentPokemon } from "@/domain/controller/player";
 import { addAilment } from "@/domain/controller/ailment";
 import { Progress } from "@/domain/model/battle";
@@ -21,7 +21,7 @@ import {
 
 describe("battle/turn", () => {
   beforeAll(() => {
-    apply({ battle: { hit: "always", sideEffect: "probability" } });
+    applySub({ battle: { hit: "always", sideEffect: "probability" } });
   });
 
   test("すなあらしのダメージとターン経過", () => {

@@ -1,4 +1,4 @@
-import { Config, defaultConfig } from "@/domain/config/log";
+import { Config, defaultConfig } from "@/config/log";
 import { Weather } from "@/domain/model/environment";
 import { Log, toString } from "@/domain/model/log";
 import { Player } from "@/domain/model/player";

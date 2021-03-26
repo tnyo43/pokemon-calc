@@ -1,5 +1,5 @@
 import { AttackMove, Move } from "@/domain/model/move";
-import { Config, defaultConfig } from "@/domain/config/move";
+import { Config, defaultConfig } from "@/config/move";
 import { probability } from "@/utils/random";
 import { ActionCommandSet, Progress } from "@/domain/model/battle";
 import { Player } from "@/domain/model/player";
@@ -14,11 +14,14 @@ import { Environment } from "@/domain/model/environment";
 
 let config = defaultConfig;
 
-export const apply = ({ battle }: { battle: Partial<Config> }) => {
+export const applySub = ({ battle }: { battle: Partial<Config> }) => {
   config = {
     ...config,
     ...battle,
   };
+};
+export const apply = ({ move }: { move: Config }) => {
+  config = move;
 };
 
 const getConfig = () => config;

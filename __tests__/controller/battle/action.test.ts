@@ -1,6 +1,6 @@
 import { runAction } from "@/domain/controller/battle/action";
 import { passTurn } from "@/domain/controller/battle/turn";
-import { apply } from "@/domain/controller/move";
+import { applySub } from "@/domain/controller/move";
 import { currentPokemon } from "@/domain/controller/player";
 import { speed } from "@/domain/controller/pokemon";
 import { Progress } from "@/domain/model/battle";
@@ -25,7 +25,7 @@ describe("battle/action", () => {
     probabilitySpy = jest
       .spyOn(mockRandom, "probability")
       .mockImplementation((_) => true);
-    apply({ battle: { hit: "probability", sideEffect: "none" } });
+    applySub({ battle: { hit: "probability", sideEffect: "none" } });
   });
 
   afterEach(() => {

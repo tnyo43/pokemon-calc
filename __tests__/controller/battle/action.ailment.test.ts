@@ -1,5 +1,5 @@
 import { runAction } from "@/domain/controller/battle/action";
-import { apply } from "@/domain/controller/move";
+import { applySub } from "@/domain/controller/move";
 import { currentPokemon } from "@/domain/controller/player";
 import { Progress } from "@/domain/model/battle";
 import { toString } from "@/domain/model/log";
@@ -25,7 +25,7 @@ describe("battle/ailment", () => {
       .spyOn(mockRandom, "probability")
       .mockImplementation((_) => true);
     rangeSpy = jest.spyOn(mockRandom, "range").mockImplementation(() => 3);
-    apply({ battle: { hit: "probability", sideEffect: "none" } });
+    applySub({ battle: { hit: "probability", sideEffect: "none" } });
   });
 
   afterEach(() => {
@@ -194,7 +194,7 @@ describe("battle/ailment", () => {
   });
 
   test("氷技で凍ることがある", () => {
-    apply({ battle: { sideEffect: "always" } });
+    applySub({ battle: { sideEffect: "always" } });
     let progress: Progress = {
       playerA: player([weavile]),
       playerB,
@@ -214,7 +214,7 @@ describe("battle/ailment", () => {
   });
 
   test("炎技でやけどになることがある", () => {
-    apply({ battle: { sideEffect: "always" } });
+    applySub({ battle: { sideEffect: "always" } });
     let progress: Progress = {
       playerA,
       playerB,
@@ -235,7 +235,7 @@ describe("battle/ailment", () => {
   });
 
   test("電気技で麻痺になることがある", () => {
-    apply({ battle: { sideEffect: "always" } });
+    applySub({ battle: { sideEffect: "always" } });
     let progress: Progress = {
       playerA: player([pikachu]),
       playerB,
