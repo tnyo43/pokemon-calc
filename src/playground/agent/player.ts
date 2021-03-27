@@ -1,4 +1,5 @@
-import { ActionCommand, PrepareCommand, Progress } from "@/domain/model/battle";
+import { ActionCommand, PrepareCommand } from "@/domain/model/command";
+import { Progress } from "@/domain/model/progress";
 import { Agent } from "@/playground/agent/agent";
 
 import * as Action from "@/playground/agent/command/action";

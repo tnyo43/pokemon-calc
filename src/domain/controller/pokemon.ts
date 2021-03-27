@@ -304,3 +304,8 @@ export const displayStatus = (pokemon: Pokemon, prefix?: string) => {
       `S: ${pm(speed)}, evasion: ${pm(evasion)}, accuracy: ${pm(accuracy)}`
   );
 };
+
+export const getMoveCandidate = (pokemon: Pokemon) =>
+  pokemon.moves
+    .map((move, i) => ({ move, i }))
+    .filter(({ i }) => canMove(pokemon, i));

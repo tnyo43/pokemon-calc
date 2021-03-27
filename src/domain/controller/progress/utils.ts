@@ -1,4 +1,4 @@
-import { PlayerKey, Progress } from "@/domain/model/battle";
+import { PlayerKey, Progress } from "@/domain/model/progress";
 import { speed as getSpeed } from "@/domain/controller/pokemon";
 import * as Log from "@/domain/controller/log";
 import {

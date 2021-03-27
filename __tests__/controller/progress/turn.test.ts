@@ -1,9 +1,9 @@
-import { runAction } from "@/domain/controller/battle/action";
-import { passTurn, runPrepare } from "@/domain/controller/battle/turn";
+import { runAction } from "@/domain/controller/progress/action";
+import { passTurn, runPrepare } from "@/domain/controller/progress/turn";
 import { applySub } from "@/domain/controller/move";
 import { currentPokemon } from "@/domain/controller/player";
 import { addAilment } from "@/domain/controller/ailment";
-import { Progress } from "@/domain/model/battle";
+import { Progress } from "@/domain/model/progress";
 import { toString } from "@/domain/model/log";
 import {
   grassy,

@@ -1,7 +1,7 @@
-import { runAction } from "@/domain/controller/battle/action";
+import { runAction } from "@/domain/controller/progress/action";
 import { applySub } from "@/domain/controller/move";
 import { currentPokemon } from "@/domain/controller/player";
-import { Progress } from "@/domain/model/battle";
+import { Progress } from "@/domain/model/progress";
 import { toString } from "@/domain/model/log";
 import { normalEnv } from "__tests__/mock/environment";
 import { player, playerA, playerB } from "__tests__/mock/player";

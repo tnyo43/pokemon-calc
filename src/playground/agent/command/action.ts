@@ -1,8 +1,11 @@
 import { Player } from "@/domain/model/player";
-import { currentPokemon } from "@/domain/controller/player";
-import { ActionCommand } from "@/domain/model/battle";
+import {
+  currentPokemon,
+  getPokemonCandidate,
+} from "@/domain/controller/player";
+import { ActionCommand } from "@/domain/model/command";
 import { read, validIndex } from "@/utils/input";
-import { canMove } from "@/domain/controller/pokemon";
+import { getMoveCandidate } from "@/domain/controller/pokemon";
 
 const initialCommand: ActionCommand | null = null;
 
@@ -26,11 +29,11 @@ const askType = async (): Promise<ActionCommand | null> =>
 
 const askMove = async (player: Player): Promise<ActionCommand | null> => {
   const pokemon = currentPokemon(player);
-  const moves = pokemon.moves
-    .map((m, i) => ({ m, i }))
-    .filter(({ i }) => canMove(pokemon, i));
+  const moves = getMoveCandidate(pokemon);
   const question = `どの技にする？ ${moves
-    .map(({ m, i }) => `[${i + 1}] ${m.name}(${pokemon.pp[i]}/${m.pp})`)
+    .map(
+      ({ move, i }) => `[${i + 1}] ${move.name}(${pokemon.pp[i]}/${move.pp})`
+    )
     .join(", ")}, [-1] 戻る >> `;
 
   return await read<ActionCommand | null>(question, (answer) => {
@@ -43,7 +46,7 @@ const askMove = async (player: Player): Promise<ActionCommand | null> => {
       answer
     );
     if (index !== null) {
-      console.log(moves[index].m.name);
+      console.log(moves[index].move.name);
       return { type: "fight", index };
     }
     console.log("もう一度入力してください");
@@ -52,11 +55,9 @@ const askMove = async (player: Player): Promise<ActionCommand | null> => {
 };
 
 const askChange = async (player: Player): Promise<ActionCommand | null> => {
-  const pokemons = player.pokemons
-    .map((p, i) => ({ p, i }))
-    .filter(({ p, i }) => i !== player.currentPokemon && !p.dying);
+  const pokemons = getPokemonCandidate(player);
   const question = `どのポケモンにする？ ${pokemons
-    .map(({ p, i }) => `[${i + 1}] => ${p.name}`)
+    .map(({ pokemon, i }) => `[${i + 1}] => ${pokemon.name}`)
     .join(", ")}, [-1] 戻る >> `;
 
   return await read<ActionCommand | null>(question, (answer) => {

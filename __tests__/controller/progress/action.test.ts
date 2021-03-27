@@ -1,9 +1,9 @@
-import { runAction } from "@/domain/controller/battle/action";
-import { passTurn } from "@/domain/controller/battle/turn";
+import { runAction } from "@/domain/controller/progress/action";
+import { passTurn } from "@/domain/controller/progress/turn";
 import { applySub } from "@/domain/controller/move";
 import { currentPokemon } from "@/domain/controller/player";
 import { speed } from "@/domain/controller/pokemon";
-import { Progress } from "@/domain/model/battle";
+import { Progress } from "@/domain/model/progress";
 import { toString } from "@/domain/model/log";
 import { hail, normalEnv, psychic, sunlight } from "__tests__/mock/environment";
 import { player, playerA, playerB } from "__tests__/mock/player";

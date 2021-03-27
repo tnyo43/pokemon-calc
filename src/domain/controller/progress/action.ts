@@ -1,11 +1,11 @@
-import { ActionCommandSet, PlayerKey, Progress } from "@/domain/model/battle";
+import { PlayerKey, Progress } from "@/domain/model/progress";
+import { ActionCommandSet } from "@/domain/model/command";
 import * as Log from "@/domain/controller/log";
-import { judge, order } from "@/domain/controller/battle/utils";
+import { judge, order } from "@/domain/controller/progress/utils";
 import {
   isHit,
   isSideEffectHappen,
   isSuccessMove,
-  sortedMoves,
 } from "@/domain/controller/move";
 import { AttackMove, HelpingMove, Move } from "@/domain/model/move";
 import {
@@ -29,6 +29,7 @@ import {
   pastSleep,
   recoverAilment,
 } from "@/domain/controller/ailment";
+import { sortedMoves } from "@/domain/controller/progress";
 
 type Args = {
   attacker: Player;

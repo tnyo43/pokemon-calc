@@ -1,4 +1,4 @@
-import { PrepareCommand } from "@/domain/model/battle";
+import { PrepareCommand } from "@/domain/model/command";
 import { Player } from "@/domain/model/player";
 import { read, validIndex } from "@/utils/input";
 

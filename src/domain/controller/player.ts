@@ -69,3 +69,8 @@ export const display = (player: Player) => {
   }
   console.log();
 };
+
+export const getPokemonCandidate = (player: Player) =>
+  player.pokemons
+    .map((pokemon, i) => ({ pokemon, i }))
+    .filter(({ pokemon, i }) => i !== player.currentPokemon && !pokemon.dying);

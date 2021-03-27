@@ -1,9 +1,5 @@
-import {
-  ActionCommand,
-  PlayerKey,
-  PrepareCommand,
-  Progress,
-} from "@/domain/model/battle";
+import { ActionCommand, PrepareCommand } from "@/domain/model/command";
+import { PlayerKey, Progress } from "@/domain/model/progress";
 
 export abstract class Agent {
   playerKey: PlayerKey;

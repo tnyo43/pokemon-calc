@@ -1,10 +1,10 @@
-import { Progress } from "@/domain/model/battle";
+import { Progress } from "@/domain/model/progress";
 import { Environment } from "@/domain/model/environment";
 import { Player } from "@/domain/model/player";
 import { display as displayPlayer } from "@/domain/controller/player";
-import { passTurn, runPrepare } from "@/domain/controller/battle/turn";
+import { passTurn, runPrepare } from "@/domain/controller/progress/turn";
 import { needToChange } from "@/domain/controller/player";
-import { runAction } from "@/domain/controller/battle/action";
+import { runAction } from "@/domain/controller/progress/action";
 import { getAgent } from "@/playground/agent";
 
 export const run = async (

@@ -1,4 +1,5 @@
-import { PlayerKey, PrepareCommandSet, Progress } from "@/domain/model/battle";
+import { PlayerKey, Progress } from "@/domain/model/progress";
+import { PrepareCommandSet } from "@/domain/model/command";
 import { beHurt, recover, updateStatus } from "@/domain/controller/pokemon";
 import {
   terrainRecover,
@@ -7,7 +8,7 @@ import {
 } from "@/domain/controller/environment";
 import * as Log from "@/domain/controller/log";
 import { Log as LogType } from "@/domain/model/log";
-import { judge, order } from "@/domain/controller/battle/utils";
+import { judge, order } from "@/domain/controller/progress/utils";
 import { updatePokemon, currentPokemon } from "@/domain/controller/player";
 import { Pokemon } from "@/domain/model/pokemon";
 
