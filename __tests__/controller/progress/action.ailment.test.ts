@@ -138,14 +138,14 @@ describe("battle/ailment", () => {
     };
     probabilitySpy = jest
       .spyOn(mockRandom, "probability")
-      .mockReturnValue(true);
+      .mockReturnValue(false);
     progress = runAction(progress, {
       playerA: { type: "fight", index: 0 },
       playerB: { type: "fight", index: 0 },
     });
     probabilitySpy = jest
       .spyOn(mockRandom, "probability")
-      .mockReturnValue(false);
+      .mockReturnValue(true);
     progress = runAction(progress, {
       playerA: { type: "fight", index: 0 },
       playerB: { type: "fight", index: 0 },
@@ -194,7 +194,10 @@ describe("battle/ailment", () => {
   });
 
   test("氷技で凍ることがある", () => {
-    applySub({ battle: { sideEffect: "always" } });
+    applySub({ battle: { sideEffect: "always", hit: "always" } });
+    probabilitySpy = jest
+      .spyOn(mockRandom, "probability")
+      .mockReturnValue(false);
     let progress: Progress = {
       playerA: player([weavile]),
       playerB,
