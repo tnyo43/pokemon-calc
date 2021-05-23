@@ -30,6 +30,7 @@ import {
   recoverAilment,
 } from "@/domain/controller/ailment";
 import { sortedMoves } from "@/domain/controller/progress";
+import { pipe } from "@/utils/pipe";
 
 type Args = {
   attacker: Player;
@@ -361,14 +362,11 @@ export const runAction = (
   command: ActionCommandSet
 ): Progress => {
   if (progress.winner) return progress;
+  const moves = sortedMoves(progress, command);
 
-  let progResult = progress;
-  progResult = changePokemon(progResult, command);
-
-  const moves = sortedMoves(progResult, command);
-  moves.forEach(({ move, isA }) => {
-    progResult = action(progResult, move, isA, command);
-  });
-
-  return progResult;
+  return pipe(progress)((p) => {
+    return changePokemon(p, command);
+  })((progress) =>
+    moves.reduce((p, { move, isA }) => action(p, move, isA, command), progress)
+  )();
 };
