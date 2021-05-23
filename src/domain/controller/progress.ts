@@ -1,5 +1,4 @@
-import { Progress } from "@/domain/model/progress";
-import { ActionCommandSet } from "@/domain/model/command";
+import { ActionCommand, ActionCommandSet } from "@/domain/model/command";
 import { Move } from "@/domain/model/move";
 import { Player } from "@/domain/model/player";
 import { priority } from "@/domain/controller/move";
@@ -9,31 +8,34 @@ import { currentPokemon } from "@/domain/controller/player";
 type MoveElement = { move: Move; isA: boolean; speed: number };
 
 export const sortedMoves = (
-  progress: Progress,
+  { playerA, playerB }: { playerA: Player; playerB: Player },
   command: ActionCommandSet
 ): Omit<MoveElement, "speed">[] => {
   const priorityRatio = 1000;
 
-  const addMove = (
-    moves: MoveElement[],
+  const getMove = (
     player: Player,
     isA: boolean,
-    index: number
-  ): MoveElement[] => {
+    command: ActionCommand
+  ): MoveElement | undefined => {
+    if (command.type !== "fight") return undefined;
     const pokemon = currentPokemon(player);
-    const move = pokemon.moves[index];
+    const move = pokemon.moves[command.index];
 
-    // for random iff some are same speed and priority
+    // 同速の時はランダムで決める
     const speed =
       priority(move) * priorityRatio + getSpeed(pokemon) + Math.random();
-    return moves.concat({ move, isA, speed });
+    return { move, isA, speed };
   };
 
-  let moves: MoveElement[] = [];
-  if (command.playerA.type === "fight")
-    moves = addMove(moves, progress.playerA, true, command.playerA.index);
-  if (command.playerB.type === "fight")
-    moves = addMove(moves, progress.playerB, false, command.playerB.index);
+  const moves = [
+    getMove(playerA, true, command.playerA),
+    getMove(playerB, false, command.playerB),
+  ];
 
-  return moves.sort((m1, m2) => m2.speed - m1.speed);
+  return moves
+    .filter(
+      (move): move is Exclude<MoveElement, undefined> => move !== undefined
+    )
+    .sort((m1, m2) => m2.speed - m1.speed);
 };
