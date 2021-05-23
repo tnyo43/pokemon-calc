@@ -20,7 +20,6 @@ import {
   reducePP,
   updateStatus,
 } from "@/domain/controller/pokemon";
-import { Player } from "@/domain/model/player";
 import { probability } from "@/utils/random";
 import {
   addAilment,
@@ -31,15 +30,6 @@ import {
 } from "@/domain/controller/ailment";
 import { sortedMoves } from "@/domain/controller/progress";
 import { pipe } from "@/utils/pipe";
-
-type Args = {
-  attacker: Player;
-  defencer: Player;
-  keys: {
-    attacker: PlayerKey;
-    defencer: PlayerKey;
-  };
-};
 
 const changePokemon = (
   progress: Progress,
@@ -74,153 +64,199 @@ const changePokemon = (
 
 const attack = (
   progress: Progress,
-  { attacker, defencer, keys }: Args,
+  playerKeys: { attacker: PlayerKey; defencer: PlayerKey },
   move: AttackMove
 ): Progress => {
-  if (progress.winner || needToChange(attacker)) return progress;
+  if (progress.winner || needToChange(progress[playerKeys.attacker]))
+    return progress;
 
-  if (currentPokemon(defencer).condition.protect) {
+  if (currentPokemon(progress[playerKeys.defencer]).condition.protect) {
     return {
       ...progress,
-      log: Log.add(progress.log, Log.protectSucceed(currentPokemon(defencer))),
+      log: Log.add(
+        progress.log,
+        Log.protectSucceed(currentPokemon(progress[playerKeys.defencer]))
+      ),
     };
   }
 
-  let log = progress.log;
-  const damageResult = damage(
-    move,
-    currentPokemon(attacker),
-    currentPokemon(defencer),
-    progress.environment
-  );
-  defencer = updatePokemon(
-    defencer,
-    beHurt(currentPokemon(defencer), damageResult)
-  );
-  log = Log.add(log, Log.damage(currentPokemon(defencer), damageResult));
-
-  let progResult = judge(
-    {
-      ...progress,
-      log,
-      [keys.defencer]: defencer,
-    },
-    keys.defencer
-  );
-
-  defencer = progResult[keys.defencer];
-  log = progResult.log;
-
-  if (currentPokemon(defencer).dying) return progResult;
-
-  if (move.sideEffect && isSideEffectHappen(move)) {
-    if (move.sideEffect.ailment) {
-      const { label } = move.sideEffect.ailment;
-      if (
-        mayBeAffected(label, currentPokemon(defencer), progress.environment)
-      ) {
-        defencer = updatePokemon(
-          defencer,
-          addAilment(currentPokemon(defencer), label)
-        );
-        log = Log.add(log, Log.ailment(currentPokemon(defencer), label));
-      }
+  return pipe(progress)((progress) => {
+    const damageResult = damage(
+      move,
+      currentPokemon(progress[playerKeys.attacker]),
+      currentPokemon(progress[playerKeys.defencer]),
+      progress.environment
+    );
+    const damagedDefencer = updatePokemon(
+      progress[playerKeys.defencer],
+      beHurt(currentPokemon(progress[playerKeys.defencer]), damageResult)
+    );
+    return judge(
+      {
+        ...progress,
+        [playerKeys.defencer]: damagedDefencer,
+        log: Log.add(
+          progress.log,
+          Log.damage(currentPokemon(damagedDefencer), damageResult)
+        ),
+      },
+      playerKeys.defencer
+    );
+  })((progress) => ({
+    progress,
+    continuing: !currentPokemon(progress[playerKeys.defencer]).dying,
+  }))(({ progress, continuing }) => {
+    if (!continuing) return progress;
+    if (
+      move.sideEffect &&
+      isSideEffectHappen(move) &&
+      move.sideEffect.ailment &&
+      mayBeAffected(
+        move.sideEffect.ailment.label,
+        currentPokemon(progress[playerKeys.defencer]),
+        progress.environment
+      )
+    ) {
+      return {
+        ...progress,
+        [playerKeys.defencer]: updatePokemon(
+          progress[playerKeys.defencer],
+          addAilment(
+            currentPokemon(progress[playerKeys.defencer]),
+            move.sideEffect.ailment.label
+          )
+        ),
+        log: Log.add(
+          progress.log,
+          Log.ailment(
+            currentPokemon(progress[playerKeys.defencer]),
+            move.sideEffect.ailment.label
+          )
+        ),
+      };
     }
-  }
-
-  progResult = {
-    ...progResult,
-    log,
-    [keys.attacker]: attacker,
-    [keys.defencer]: defencer,
-  };
-
-  progResult = judge(progResult, keys.attacker);
-  return progResult;
+    return progress;
+  })((progress) => judge(progress, playerKeys.attacker))();
 };
 
 const helping = (
   progress: Progress,
-  { attacker, defencer, keys }: Args,
+  playerKeys: { attacker: PlayerKey; defencer: PlayerKey },
   move: HelpingMove
-) => {
-  if (progress.winner || needToChange(attacker)) return progress;
+): Progress => {
+  if (progress.winner || needToChange(progress[playerKeys.attacker]))
+    return progress;
 
   if (
-    currentPokemon(defencer).condition.protect &&
+    currentPokemon(progress[playerKeys.defencer]).condition.protect &&
     (move.statusDiff?.opponent || move.ailment)
   ) {
     return {
       ...progress,
-      log: Log.add(progress.log, Log.protectSucceed(currentPokemon(defencer))),
+      log: Log.add(
+        progress.log,
+        Log.protectSucceed(currentPokemon(progress[playerKeys.defencer]))
+      ),
     };
   }
 
-  let log = progress.log;
-  if (move.statusDiff?.own) {
-    log = Log.add(
-      log,
-      Log.status(
-        currentPokemon(attacker),
-        convertStatus(currentPokemon(attacker), move.statusDiff?.own)
-      )
-    );
-  }
-  if (move.protect) {
-    log = Log.add(log, Log.protect(currentPokemon(attacker)));
-    attacker = updatePokemon(attacker, {
-      ...currentPokemon(attacker),
-      condition: {
-        ...currentPokemon(attacker).condition,
-        protect: true,
-      },
-    });
-  } else if (move.statusDiff?.opponent) {
-    log = Log.add(
-      log,
-      Log.status(
-        currentPokemon(defencer),
-        convertStatus(currentPokemon(defencer), move.statusDiff?.opponent)
-      )
-    );
-  }
-  if (move.ailment) {
-    if (
-      !hasAilment(currentPokemon(defencer)) &&
-      mayBeAffected(
-        move.ailment,
-        currentPokemon(defencer),
-        progress.environment
-      )
-    ) {
-      log = Log.add(log, Log.ailment(currentPokemon(defencer), move.ailment));
-      defencer = updatePokemon(
-        defencer,
-        addAilment(currentPokemon(defencer), move.ailment)
-      );
-    } else {
-      log = Log.add(log, Log.failed());
-    }
-  }
-
-  return {
-    ...progress,
-    [keys.attacker]: updatePokemon(
-      attacker,
-      updateStatus(
-        currentPokemon(attacker),
-        move.statusDiff?.own ? move.statusDiff?.own : {}
-      )
-    ),
-    [keys.defencer]: updatePokemon(
-      defencer,
-      updateStatus(
-        currentPokemon(defencer),
-        move.statusDiff?.opponent ? move.statusDiff?.opponent : {}
-      )
-    ),
-    log,
-  };
+  return pipe(progress)((progress) =>
+    move.statusDiff?.own
+      ? {
+          ...progress,
+          [playerKeys.attacker]: updatePokemon(
+            progress[playerKeys.attacker],
+            updateStatus(
+              currentPokemon(progress[playerKeys.attacker]),
+              convertStatus(
+                currentPokemon(progress[playerKeys.attacker]),
+                move.statusDiff.own
+              )
+            )
+          ),
+          log: Log.add(
+            progress.log,
+            Log.status(
+              currentPokemon(progress[playerKeys.attacker]),
+              convertStatus(
+                currentPokemon(progress[playerKeys.attacker]),
+                move.statusDiff.own
+              )
+            )
+          ),
+        }
+      : progress
+  )((progress) =>
+    move.protect
+      ? {
+          ...progress,
+          [playerKeys.attacker]: updatePokemon(progress[playerKeys.attacker], {
+            ...currentPokemon(progress[playerKeys.attacker]),
+            condition: {
+              ...currentPokemon(progress[playerKeys.attacker]).condition,
+              protect: true,
+            },
+          }),
+          log: Log.add(
+            progress.log,
+            Log.protect(currentPokemon(progress[playerKeys.attacker]))
+          ),
+        }
+      : progress
+  )((progress) =>
+    move.statusDiff?.opponent
+      ? {
+          ...progress,
+          [playerKeys.defencer]: updatePokemon(
+            progress[playerKeys.defencer],
+            updateStatus(
+              currentPokemon(progress[playerKeys.defencer]),
+              convertStatus(
+                currentPokemon(progress[playerKeys.defencer]),
+                move.statusDiff.opponent
+              )
+            )
+          ),
+          log: Log.add(
+            progress.log,
+            Log.status(
+              currentPokemon(progress[playerKeys.defencer]),
+              convertStatus(
+                currentPokemon(progress[playerKeys.defencer]),
+                move.statusDiff.opponent
+              )
+            )
+          ),
+        }
+      : progress
+  )((progress) =>
+    !move.ailment
+      ? progress
+      : !hasAilment(currentPokemon(progress[playerKeys.defencer])) &&
+        mayBeAffected(
+          move.ailment,
+          currentPokemon(progress[playerKeys.defencer]),
+          progress.environment
+        )
+      ? {
+          ...progress,
+          [playerKeys.defencer]: updatePokemon(
+            progress[playerKeys.defencer],
+            addAilment(
+              currentPokemon(progress[playerKeys.defencer]),
+              move.ailment
+            )
+          ),
+          log: Log.add(
+            progress.log,
+            Log.ailment(
+              currentPokemon(progress[playerKeys.defencer]),
+              move.ailment
+            )
+          ),
+        }
+      : { ...progress, log: Log.add(progress.log, Log.failed()) }
+  )();
 };
 
 const cannotMoveByAilment = (
@@ -307,7 +343,7 @@ const action = (
   isA: boolean,
   command: ActionCommandSet
 ) => {
-  const playerKeys: Args["keys"] = isA
+  const playerKeys: { attacker: PlayerKey; defencer: PlayerKey } = isA
     ? { attacker: "playerA", defencer: "playerB" }
     : { attacker: "playerB", defencer: "playerA" };
 
@@ -325,19 +361,14 @@ const action = (
             command,
             move
           ),
-          canContinue: canMove,
+          continuing: canMove,
         }
-      : { progress, canContinue: canMove }
-  )(({ progress, canContinue }) => {
-    const args: Args = {
-      attacker: progress[playerKeys.attacker],
-      defencer: progress[playerKeys.defencer],
-      keys: playerKeys,
-    };
-    return canContinue
+      : { progress, continuing: canMove }
+  )(({ progress, continuing }) => {
+    return continuing
       ? !isSuccessMove(
           move,
-          currentPokemon(args.attacker),
+          currentPokemon(progress[playerKeys.attacker]),
           progress.environment
         )
         ? {
@@ -353,8 +384,8 @@ const action = (
             ),
           }
         : move.moveType === "helping"
-        ? helping(progress, args, move)
-        : attack(progress, args, move)
+        ? helping(progress, playerKeys, move)
+        : attack(progress, playerKeys, move)
       : progress;
   })();
 };
